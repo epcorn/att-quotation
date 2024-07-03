@@ -134,11 +134,9 @@ const quotationSchema = mongoose.Schema(
     },
     kindAttention: {
       type: String,
-      required: true,
     },
     kindAttentionPrefix: {
       type: String,
-      required: true,
     },
     billToAddress: {
       prefix: {
