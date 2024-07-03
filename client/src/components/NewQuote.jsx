@@ -424,7 +424,6 @@ function NewQuote({ onClose }) {
               <div className="mb-2 ">
                 <Label htmlFor="kindAttentionPrefix">
                   <span>Prefix</span>
-                  <span className=" text-red-500">*</span>
                 </Label>
               </div>
               <Select
@@ -471,7 +470,6 @@ function NewQuote({ onClose }) {
             <div className="mb-2 block">
               <Label htmlFor="emailTo">
                 <span>Email To: </span>
-                <span className=" text-red-500">*</span>
               </Label>
             </div>
             <TextInput
