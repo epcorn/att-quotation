@@ -392,9 +392,9 @@ function NewQuote({ onClose }) {
     if (quote.salePerson === "") {
       toast.error("Please select salePerson!");
     }
-    if (quote.kindAttention === "" || quote.kindAttentionPrefix === "") {
-      toast.error("Please enter Kind Attn: value!");
-    }
+    // if (quote.kindAttention === "" || quote.kindAttentionPrefix === "") {
+    //   toast.error("Please enter Kind Attn: value!");
+    // }
     const data = { quote, infoArray };
     const actionResult = await dispatch(createQuote(data));
     const result = await unwrapResult(actionResult);
@@ -441,7 +441,6 @@ function NewQuote({ onClose }) {
               <div className="mb-2 block">
                 <Label htmlFor="kindAttention">
                   <span>Kind Attn: </span>
-                  <span className=" text-red-500">*</span>
                 </Label>
               </div>
               <TextInput
