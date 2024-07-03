@@ -1,0 +1,179 @@
+import { useState } from "react";
+import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
+import { useDispatch } from "react-redux";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { searchQuotes } from "../redux/quote/quoteSlice";
+
+// eslint-disable-next-line react/prop-types
+const SearchQuote = ({ setExtraQuery }) => {
+  const dispatch = useDispatch();
+  const [createdBy, setCreatedBy] = useState("");
+  const [projectName, setProjectName] = useState("");
+  const [quotationNo, setQuotationNo] = useState("");
+  const [quotationDate, setQuotationDate] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState({
+    createdBy: false,
+    projectName: false,
+    quotationDate: false,
+    quotationNo: false,
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleSearch = async () => {
+    let query = "";
+
+    if (selectedFilters.createdBy) {
+      query += `&createdBy=${createdBy}`;
+    }
+
+    if (selectedFilters.projectName) {
+      query += `&projectName=${projectName}`;
+    }
+
+    if (selectedFilters.quotationDate) {
+      query += `&quotationDate=${quotationDate}`;
+    }
+
+    if (selectedFilters.quotationNo) {
+      query += `&quotationNo=${quotationNo}`;
+    }
+
+    try {
+      console.log(query);
+      setLoading(true);
+      const resultAction = await dispatch(searchQuotes(query.slice(1)));
+      setExtraQuery(query.slice(1));
+      // eslint-disable-next-line no-unused-vars
+      const result = unwrapResult(resultAction);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching tickets:", error);
+    }
+  };
+
+  return (
+    <div className=" max-w-7xl mx-auto">
+      <div className="flex items-center  sm:justify-evenly gap-3 pr-6 flex-wrap">
+        <div>
+          <Label htmlFor="quotationNo" className="font-bold text-blue-600">
+            Quotation No
+          </Label>
+          <div className="flex items-center justify-center">
+            <TextInput
+              type="text"
+              name="quotationNo"
+              id="quotationNo"
+              value={quotationNo}
+              onChange={(e) => setQuotationNo(e.target.value)}
+            />
+            <Checkbox
+              type="checkbox"
+              className=" ml-1"
+              name="quotationNo"
+              checked={selectedFilters.quotationNo}
+              onChange={(e) =>
+                setSelectedFilters({
+                  ...selectedFilters,
+                  quotationNo: e.target.checked,
+                })
+              }
+            />
+          </div>
+        </div>
+        <div className="">
+          <Label htmlFor="createdBy" className="font-bold text-blue-600">
+            Created By
+          </Label>
+          <div className="flex items-center justify-center">
+            <TextInput
+              type="text"
+              value={createdBy}
+              name="createdBy"
+              id="createdBy"
+              onChange={(e) => setCreatedBy(e.target.value)}
+            />
+            <Checkbox
+              name="createdBy"
+              checked={selectedFilters.createdBy}
+              className=" ml-1"
+              onChange={(e) =>
+                setSelectedFilters({
+                  ...selectedFilters,
+                  createdBy: e.target.checked,
+                })
+              }
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="projectName" className=" font-bold text-blue-600">
+            projectName
+          </Label>
+          <div className="flex items-center justify-center">
+            <TextInput
+              type="text"
+              value={projectName}
+              name="projectName"
+              id="projectName"
+              onChange={(e) => setProjectName(e.target.value)}
+            />
+            <Checkbox
+              type="checkbox"
+              checked={selectedFilters.projectName}
+              className=" ml-1"
+              name="projectName"
+              onChange={(e) =>
+                setSelectedFilters({
+                  ...selectedFilters,
+                  projectName: e.target.checked,
+                })
+              }
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="" className="font-bold text-blue-600">
+            Quotation Date
+          </Label>
+          <div className="flex items-center justify-center">
+            <input
+              type="date"
+              value={quotationDate}
+              name="quotationDate"
+              id="quotationDate"
+              className="w-full px-3 py-2 border rounded-md"
+              onChange={(e) => setQuotationDate(e.target.value)}
+            ></input>
+            <Checkbox
+              type="checkbox"
+              checked={selectedFilters.quotationDate}
+              className=" ml-1"
+              name="quotationDate"
+              onChange={(e) =>
+                setSelectedFilters({
+                  ...selectedFilters,
+                  quotationDate: e.target.checked,
+                })
+              }
+            />
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-center mt-2">
+        <Button gradientDuoTone="redToYellow" onClick={handleSearch}>
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <span className=" pr-3">Searching...</span>
+              <Spinner size="sm" />
+            </div>
+          ) : (
+            "Search"
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default SearchQuote;

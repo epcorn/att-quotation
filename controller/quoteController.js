@@ -1,0 +1,554 @@
+import {
+  Quotation,
+  QuoteArchive,
+  QuoteInfo,
+} from "../models/quotationModel.js";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType,
+  BorderStyle,
+  Header,
+  Footer,
+} from "docx";
+import fs from "fs/promises";
+import path from "path";
+import mongoose, { model } from "mongoose";
+import libre from "libreoffice-convert";
+import { promisify } from "util";
+
+const convertAsync = promisify(libre.convert);
+
+const toPdf = async (req, res, next) => {
+  try {
+    const __dirname = path.resolve();
+    const inputPath = path.join(__dirname, "./temp/TicketNest.docx");
+    const outputPath = path.join(__dirname, "./temp/output.pdf");
+    const docxFile = await fs.readFile(inputPath);
+    const pdfBuffer = await convertAsync(docxFile, ".pdf", undefined);
+    await fs.writeFile(outputPath, pdfBuffer);
+    res.status(200).json({ message: "check forlder" });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+const create = async (req, res, next) => {
+  try {
+    const { quote, infoArray = [] } = req.body;
+    const {
+      quotationDate,
+      kindAttention,
+      kindAttentionPrefix,
+      reference,
+      salePerson,
+      billToAddress,
+      shipToAddress,
+      specification,
+      note,
+      quotationNo,
+    } = quote;
+    const { projectName } = shipToAddress;
+    if (!projectName || !specification) {
+      return res
+        .status(400)
+        .json({ message: "Project name and specification are required." });
+    }
+    let quoteInfoIds = [];
+    for (let i = 0; i < infoArray.length; i++) {
+      const quoteData = infoArray[i];
+      const newInfo = await QuoteInfo.create(quoteData);
+      quoteInfoIds.push(newInfo._id);
+    }
+
+    // Create Quotation instance
+    const newQuotation = await Quotation.create({
+      quotationDate: quotationDate || Date.now(),
+      billToAddress,
+      kindAttention,
+      kindAttentionPrefix,
+      reference,
+      shipToAddress,
+      projectName,
+      specification,
+      salesPerson: salePerson,
+      createdBy: req.user.id,
+      quoteInfo: quoteInfoIds,
+      note,
+      quotationNo,
+    });
+
+    const populatedQuotation = await newQuotation.populate(
+      "createdBy",
+      "username"
+    );
+
+    if (newQuotation) {
+      res
+        .status(200)
+        .json({ message: "Quotation Created!", result: populatedQuotation });
+    } else {
+      res.status(500).json({ message: "Quotation creation failed." });
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const quotes = async (req, res, next) => {
+  try {
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const limit = parseInt(req.query.limit) || 9;
+    const sortDirection = req.query.order === "asc" ? 1 : -1;
+    const quotes = await Quotation.find({
+      ...(req.query.createdBy && {
+        createdBy: { $regex: new RegExp(req.query.createdBy, "i") },
+      }),
+      ...(req.query.projectName && {
+        "shipToAddress.projectName": {
+          $regex: new RegExp(req.query.projectName, "i"),
+        },
+      }),
+      ...(req.query.quotationDate && {
+        quotationDate: req.query.quotationDate,
+      }),
+      ...(req.query.quotationNo && { quotationNo: req.query.quotationNo }),
+    })
+      .lean()
+      .populate("createdBy", "username")
+      .sort({ updatedAt: sortDirection })
+      .skip(startIndex)
+      .limit(limit);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const totalQuotes = await Quotation.countDocuments();
+    const todayQuotes = await Quotation.countDocuments({
+      createdAt: { $gte: today },
+    });
+    quotes.map((q) => console.log(q.createdAt, q.updatedAt));
+    res.status(200).json({
+      message: "Quotation Created",
+      result: quotes,
+      totalQuotes,
+      todayQuotes,
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+const singleQuote = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const quote = await Quotation.findById(id).populate("quoteInfo");
+    if (!quote) {
+      res.status(400).json({ message: "NO such Quotation" });
+      return;
+    }
+    res.status(200).json({
+      message: "",
+      result: quote,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const update = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const quotationId = req.params.id;
+    const updatedData = req.body;
+    const { quoteInfo, ...otherFields } = updatedData;
+    const isapproved = await Quotation.isApproved(quotationId);
+    if (isapproved) {
+      const { _id, ...state } = await Quotation.findById(quotationId)
+        .populate("quoteInfo")
+        .populate({ path: "salesPerson", select: "-password" })
+        .populate({ path: "createdBy", select: "-password" })
+        .lean({ virtuals: ["subject"] });
+      const author = req.user.id;
+      const archive = await createQuoteArchiveEntry(quotationId, state, author);
+    }
+
+    // Update all fields except quoteInfo
+    const updatedQuotation = await Quotation.findOneAndUpdate(
+      { _id: quotationId },
+      { $set: otherFields },
+      { new: true, runValidators: true, session }
+    );
+
+    if (!updatedQuotation) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Quotation not found" });
+    }
+
+    // Update or create quoteInfo documents
+    const updatedQuoteInfoIds = [];
+    for (const info of quoteInfo) {
+      let quoteInfoDoc;
+      if (info._id) {
+        // Update existing quoteInfo
+        quoteInfoDoc = await QuoteInfo.findByIdAndUpdate(
+          info._id,
+          { $set: info },
+          { new: true, runValidators: true, session }
+        );
+      } else {
+        // Create new quoteInfo
+        quoteInfoDoc = new QuoteInfo(info);
+        await quoteInfoDoc.save({ session });
+      }
+      updatedQuoteInfoIds.push(quoteInfoDoc._id);
+    }
+
+    // Update the quotation with the new quoteInfo ids
+    updatedQuotation.quoteInfo = updatedQuoteInfoIds;
+    await updatedQuotation.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Fetch the updated quotation with populated quoteInfo
+    const finalQuotation = await Quotation.findById(quotationId)
+      .populate("quoteInfo")
+      .populate("createdBy");
+    res
+      .status(200)
+      .json({ message: "Quotation Updated", result: finalQuotation });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+  }
+};
+async function createQuoteArchiveEntry(quoteId, state, author) {
+  const theArchive = await QuoteArchive.findOne({ quotationId: quoteId });
+  console.log(theArchive);
+  if (theArchive) {
+    theArchive.revisions.push({ state, author });
+    await theArchive.save();
+  } else {
+    const newArchive = new QuoteArchive({
+      quotationId: quoteId,
+      revisions: [{ state, author }],
+    });
+    await newArchive.save();
+  }
+}
+
+const docx = async (req, res, next) => {
+  try {
+    const __dirname = path.resolve();
+    const outputPath = path.join(__dirname, "./temp/output.docx");
+    // const data = {
+    //   quotationNo: "EPPL/ATT/QTN/2023-001",
+    //   quotationDate: {
+    //     $date: {
+    //       $numberLong: "1687305600000",
+    //     },
+    //   },
+    //   kindAttentionPrefix: "Mr.",
+    //   kindAttention: "Parag Datar",
+    //   subject: "Quotation for Anti-Termite Treatment",
+    //   reference: "Your enquiry and our discussion",
+    //   treatmentType: "Anti-Termite Treatment",
+    //   specification: "As per IS 6313 (Part 2):2013 & 2022",
+    //   equipments:
+    //     "Sprayers & Sprinklers will be used to ensure proper penetration of chemicals into the earth.",
+    //   paymentTerms: "Within 15 days from the date of submission of bill.",
+    //   taxation: "GST @ 18% As Applicable.",
+    //   note: "1) (Before/After Raft)(At the Rate 5.0 Ltr/Per Sq.mt)\n2) (At the Rate 7.5 ltr/Per sq.mt)",
+    //   quoteInfo: [
+    //     {
+    //       workAreaType: "Basement Area",
+    //       workArea: "20,000",
+    //       workAreaUnit: "Sq.ft",
+    //       chemicalRate: "3.50",
+    //       chemicalRateUnit: "Sq.ft",
+    //       chemical: 'Imidachloprid 30.5% SC ("PREMISE" - By Bayer India/ENVU)',
+    //     },
+    //     {
+    //       workAreaType: "Ground Floor",
+    //       workArea: "15,000",
+    //       workAreaUnit: "Sq.ft",
+    //       chemicalRate: "3.75",
+    //       chemicalRateUnit: "Sq.ft",
+    //       chemical: 'Imidachloprid 30.5% SC ("PREMISE" - By Bayer India/ENVU)',
+    //     },
+    //     {
+    //       workAreaType: "External Perimeter",
+    //       workArea: "5,000",
+    //       workAreaUnit: "Linear ft",
+    //       chemicalRate: "4.00",
+    //       chemicalRateUnit: "Linear ft",
+    //       chemical: 'Imidachloprid 30.5% SC ("PREMISE" - By Bayer India/ENVU)',
+    //     },
+    //   ],
+    //   billToAddress: {
+    //     prefix: "Ms.",
+    //     name: "Dhruva Woolen Mills Pvt. Ltd.",
+    //     a1: "Runwal & Omkar Esquare,",
+    //     a2: "5th floor,",
+    //     a3: "Sion Trombay Road,",
+    //     a4: "Sion (E),",
+    //     a5: "Opp. Sion Chunabhatti Signal,",
+    //     city: "Mumbai",
+    //     pincode: "400022",
+    //   },
+    // };
+    const data = await Quotation.findOne({
+      quotationNo: "EPPL/ATT/QTN/4",
+    })
+      .populate("quoteInfo")
+      .lean({ virtuals: ["subject"] });
+    const quotationDoc = generateQuotation(data);
+
+    const buffer = await Packer.toBuffer(quotationDoc);
+    // Set the appropriate headers
+    res.setHeader("Content-Disposition", "attachment; filename=Quotation.docx");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
+
+    // Send the buffer as the response
+    res.send(buffer);
+  } catch (error) {
+    next(error);
+  }
+};
+const docData = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const data = await Quotation.findById(id)
+      .populate("quoteInfo")
+      .populate("salesPerson")
+      .populate("createdBy", "initials")
+      .lean({ virtuals: ["subject"] });
+    res.status(200).json({
+      message: "Nothing to say for now.",
+      result: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const approve = async (req, res, next) => {
+  try {
+    res.status(400).json({ message: "Quotation Approvel is at Halt!" });
+    const { id } = req.params;
+    const data = await Quotation.findByIdAndUpdate(id)
+      .populate("quoteInfo")
+      .populate("createdBy");
+    await data.approve();
+    res.status(200).json({
+      message: "Quotation Approved.",
+      result: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+const getArchive = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const data = await Quotation.findById(id)
+      .populate("quoteInfo")
+      .populate("salesPerson")
+      .populate("createdBy", "initials")
+      .populate({
+        path: "archive",
+        populate: { path: "revisions.author", model: "User" },
+      })
+      .lean({ virtuals: ["subject"] });
+    res.status(200).json({
+      message: "Nothing to say for now.",
+      result: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+function generateQuotation(data) {
+  const doc = new Document({
+    sections: [
+      {
+        headers: {
+          default: new Header({
+            children: [new Paragraph("Header text")],
+          }),
+        },
+        footers: {
+          default: new Footer({
+            children: [new Paragraph("Footer text")],
+          }),
+        },
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Quotation Number: ${data.quotationNo}`,
+                bold: true,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Date: ${new Date(
+                  data.quotationDate
+                ).toLocaleDateString()}`,
+                bold: true,
+              }),
+            ],
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Kind Attention: ${data.kindAttentionPrefix} ${data.kindAttention}`,
+                bold: true,
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: `Subject: ${data.subject}` })],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: `Reference: ${data.reference}` })],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: `Treatment Type: ${data.treatmentType}` }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: `Specification: ${data.specification}` }),
+            ],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: `Equipments: ${data.equipments}` })],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: `Payment Terms: ${data.paymentTerms}` }),
+            ],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: `Taxation: ${data.taxation}` })],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: `Note: ${data.note}` })],
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [new TextRun({ text: "Work Area Details:", bold: true })],
+          }),
+          createQuoteInfoTable(data.quoteInfo),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [
+              new TextRun(
+                "We hope you will accept the same and will give us the opportunity to be of service to you."
+              ),
+            ],
+          }),
+          new Paragraph({
+            children: [new TextRun("Please call us for clarification if any.")],
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [new TextRun("Thanking you,")],
+          }),
+          new Paragraph({
+            children: [new TextRun("Yours Faithfully,")],
+          }),
+          new Paragraph({
+            children: [new TextRun("For EXPRESS PESTICIDES PVT.LTD.")],
+          }),
+          new Paragraph({ text: "" }),
+          new Paragraph({
+            children: [new TextRun("Authorized Signatory")],
+          }),
+        ],
+      },
+    ],
+  });
+
+  return doc;
+}
+function createQuoteInfoTable(quoteInfo) {
+  const table = new Table({
+    width: {
+      size: 100,
+      type: WidthType.PERCENTAGE,
+    },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1 },
+      bottom: { style: BorderStyle.SINGLE, size: 1 },
+      left: { style: BorderStyle.SINGLE, size: 1 },
+      right: { style: BorderStyle.SINGLE, size: 1 },
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
+      insideVertical: { style: BorderStyle.SINGLE, size: 1 },
+    },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph("Work Area Type")] }),
+          new TableCell({ children: [new Paragraph("Work Area")] }),
+          new TableCell({ children: [new Paragraph("Chemical Rate")] }),
+          new TableCell({ children: [new Paragraph("Chemical")] }),
+        ],
+      }),
+      ...quoteInfo.map(
+        (info) =>
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(info.workAreaType)] }),
+              new TableCell({
+                children: [
+                  new Paragraph(`${info.workArea} ${info.workAreaUnit}`),
+                ],
+              }),
+              new TableCell({
+                children: [
+                  new Paragraph(
+                    `${info.chemicalRate} ${info.chemicalRateUnit}`
+                  ),
+                ],
+              }),
+              new TableCell({ children: [new Paragraph(info.chemical)] }),
+            ],
+          })
+      ),
+    ],
+  });
+
+  return table;
+}
+
+export {
+  create,
+  quotes,
+  docx,
+  singleQuote,
+  docData,
+  update,
+  approve,
+  toPdf,
+  getArchive,
+};
