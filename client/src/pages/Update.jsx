@@ -316,6 +316,46 @@ function Update({ quoteId, onClose }) {
           </div>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="max-w-full border p-1">
+          <div className="mb-2 block">
+            <Label htmlFor="reference" className="grid grid-cols-12">
+              <span className=" col-span-2">
+                Ref: <span className="text-red-500">*</span>
+              </span>
+              <Select name="reference" className="col-span-9">
+                <option></option>
+                <option>Ref1</option>
+                <option>Ref2</option>
+              </Select>
+            </Label>
+          </div>
+          <TextInput
+            name="reference"
+            onChange={handleChange}
+            value={quote.reference}
+            placeholder="Reference"
+          />
+        </div>
+        <div className="max-w-full">
+          <div className="mb-2 block">
+            <Label htmlFor="specification" value="Specification">
+              <span>Specification</span>
+              <span className="text-red-500">*</span>
+            </Label>
+          </div>
+          <Select
+            name="specification"
+            onChange={handleChange}
+            value={quote.specification}
+          >
+            <option></option>
+            <option>As per IS 6313 (Part 2):2013 & 2022</option>
+            <option>As per IS 6313 (Part 2):2013</option>
+          </Select>
+        </div>
+      </div>
       {quote.quoteInfo?.length >= 1
         ? quote.quoteInfo.map((type) => (
             <div

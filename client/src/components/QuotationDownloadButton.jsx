@@ -91,8 +91,7 @@ const QuotationGenerator = ({ id }) => {
           ],
         }),
         new Paragraph({ text: "" }),
-        createInfoTable(data),
-        new Paragraph({ text: "" }),
+        createInfoTable(data, standard.length, applySupply.length),
         new Paragraph({ text: "" }),
         new Paragraph({
           children: [new TextRun({ text: "Quote Information:", bold: true })],
@@ -125,6 +124,7 @@ const QuotationGenerator = ({ id }) => {
             }),
           ],
         }),
+        new Paragraph({ text: "" }),
         new Paragraph({
           children: [
             new TextRun({
@@ -139,6 +139,7 @@ const QuotationGenerator = ({ id }) => {
             }),
           ],
         }),
+        new Paragraph({ text: "" }),
         new Paragraph({
           children: [
             new TextRun({
@@ -316,16 +317,16 @@ const QuotationGenerator = ({ id }) => {
       children: [
         new TableCell({
           children: [new Paragraph({ children: [labelText] })],
-          width: { size: 20, type: WidthType.PERCENTAGE },
+          width: { size: 25, type: WidthType.PERCENTAGE },
         }),
         new TableCell({
           children: [new Paragraph({ children: [valueText] })],
-          width: { size: 80, type: WidthType.PERCENTAGE },
+          width: { size: 90, type: WidthType.PERCENTAGE },
         }),
       ],
     });
   };
-  const createInfoTable = (data) => {
+  const createInfoTable = (data, sL, aL) => {
     return new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       borders: {
@@ -338,20 +339,39 @@ const QuotationGenerator = ({ id }) => {
       },
       rows: [
         createInfoRow("Subject:", data.subject + " " + data.shipToAddress.a4),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Reference:", data.reference),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow(
           "Treatment Type:",
           data.treatmentType + "  [Sac-code ... 998531]"
         ),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Specification:", data.specification),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Equipments:", data.equipments),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Payment Terms:", data.paymentTerms),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Taxation:", data.taxation),
         //createInfoRow("Note:", data.note),
+        ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow(
           "Service Warranty:",
           "10 Years In case of subterranean or ground dwelling of termite infestation during the guarantee period, we undertake to treat the same and eradicate the termite infestation without any extra cost to you. This guarantee will be forwarded on stamp paper."
         ),
+      ],
+    });
+  };
+  const createEmptyRow = () => {
+    return new TableRow({
+      children: [
+        new TableCell({
+          children: [new Paragraph({})],
+        }),
+        new TableCell({
+          children: [new Paragraph({})],
+        }),
       ],
     });
   };
