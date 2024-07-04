@@ -229,7 +229,7 @@ const ViewQuote = forwardRef((props) => {
                             {info.workArea} {info.workAreaUnit}
                           </td>
                           <td className="px-4 py-2 border-b border-gray-200">
-                            {` ${info.serviceRate} ${info.serviceRateUnit}`}
+                            {`₹ ${info.serviceRate} ${info.serviceRateUnit}`}
                           </td>
                           <td className="px-4 py-2 border-b border-gray-200">
                             {info.chemical}
@@ -265,7 +265,7 @@ const ViewQuote = forwardRef((props) => {
                             {info.workArea} {info.workAreaUnit}
                           </td>
                           <td className="px-4 py-2 border-b border-gray-200">
-                            {info.chemicalRate} {info.chemicalRateUnit}
+                            {`₹ ${info.chemicalRate} ${info.chemicalRateUnit}`}
                           </td>
                           <td className="px-4 py-2 border-b border-gray-200">
                             {info.chemicalRate} {info.chemicalRateUnit}
@@ -274,7 +274,7 @@ const ViewQuote = forwardRef((props) => {
                             {info.chemical}
                           </td>
                           <td className="px-4 py-2 border-b border-gray-200">
-                            {info.applyRate} {info.applyRateUnit}
+                            {`₹ ${info.applyRate} ${info.applyRateUnit}`}
                           </td>
                         </tr>
                       ))}
