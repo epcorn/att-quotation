@@ -404,7 +404,7 @@ const QuotationGenerator = ({ id }) => {
               children: [
                 info.workAreaType,
                 `${info.workArea} ${info.workAreaUnit}`,
-                `${info.serviceRate} ${info.serviceRateUnit}`,
+                `₹ ${info.serviceRate} ${info.serviceRateUnit}`,
                 info.chemical,
               ].map(
                 (text) => new TableCell({ children: [new Paragraph({ text })] })
@@ -440,10 +440,12 @@ const QuotationGenerator = ({ id }) => {
               children: [
                 info.workAreaType,
                 `${info.workArea} ${info.workAreaUnit}`,
-                info.applyRate ? `${info.applyRate} ${info.applyRateUnit}` : "",
+                info.applyRate
+                  ? `₹ ${info.applyRate} ${info.applyRateUnit}`
+                  : "",
                 `${info.chemicalQuantity} Ltr.` || "",
                 info.chemicalRate
-                  ? `${info.chemicalRate} ${info.chemicalRateUnit}`
+                  ? `₹ ${info.chemicalRate} ${info.chemicalRateUnit}`
                   : "",
                 info.chemical,
               ].map(

@@ -34,6 +34,8 @@ const quoteInfoSchema = mongoose.Schema({
     type: String,
     enum: [
       "Basement Area",
+      "Basement Area (Horizontal)",
+      "Basement Area (Vertical)",
       "Retaining Wall",
       "Raft",
       "Plinth",

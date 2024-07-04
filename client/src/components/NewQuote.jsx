@@ -821,6 +821,8 @@ function NewQuote({ onClose }) {
               <option>Plinth</option>
               <option>Periphery</option>
               <option>Floor</option>
+              <option>Basement Area (Horizontal)</option>
+              <option>Basement Area (Vertical)</option>
             </Select>
           </div>
           <div className="col-span-4 border p-1">
