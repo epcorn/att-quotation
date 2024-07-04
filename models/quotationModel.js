@@ -50,7 +50,7 @@ const quoteInfoSchema = mongoose.Schema({
   },
   workAreaUnit: {
     type: String,
-    enum: ["Sq.fts", "Sq.mts", "Rn.fts"],
+    enum: ["Sq.fts", "Sq.mts", "Rn.fts", "Rn.mts"],
     validate: {
       validator: function (v) {
         return v === null || this.workArea !== null;
@@ -79,7 +79,7 @@ const quoteInfoSchema = mongoose.Schema({
   },
   serviceRateUnit: {
     type: String,
-    enum: ["Per Sq.ft", "Per Sq.mt", "Per Rn.ft"],
+    enum: ["Per Sq.ft", "Per Sq.mt", "Per Rn.ft", "Per Rn.mt"],
     default: null,
     validate: {
       validator: function (v) {
@@ -95,7 +95,7 @@ const quoteInfoSchema = mongoose.Schema({
   },
   applyRateUnit: {
     type: String,
-    enum: ["Per Sq.ft", "Per Sq.mt", "Per Rn.ft"],
+    enum: ["Per Sq.ft", "Per Sq.mt", "Per Rn.ft", "Per Rn.mt"],
     default: null,
     validate: {
       validator: function (v) {

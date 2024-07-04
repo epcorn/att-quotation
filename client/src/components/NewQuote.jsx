@@ -883,6 +883,7 @@ function NewQuote({ onClose }) {
                       <option value="Sq.fts">Sq.fts</option>
                       <option value="Sq.mts">Sq.mts</option>
                       <option value="Rn.fts">Rn.fts</option>
+                      <option value="Rn.mts">Rn.mts</option>
                     </Select>
                   </div>
                 </div>
@@ -907,6 +908,7 @@ function NewQuote({ onClose }) {
                         <option value="Per Sq.ft">Per Sq.ft</option>
                         <option value="Per Sq.mt">Per Sq.mt</option>
                         <option value="Per Rn.ft">Per Rn.ft</option>
+                        <option value="Per Rn.mt">Per Rn.mt</option>
                       </Select>
                     </div>
                   </div>
@@ -993,6 +995,7 @@ function NewQuote({ onClose }) {
                         <option value="Per Sq.ft">Per Sq.ft</option>
                         <option value="Per Sq.mt">Per Sq.mt</option>
                         <option value="Per Rn.ft">Per Rn.ft</option>
+                        <option value="Per Rn.mt">Per Rn.mt</option>
                       </Select>
                     </div>
                   </div>

@@ -274,6 +274,7 @@ const QuotationGenerator = ({ id }) => {
                 new Paragraph({ text: "Bill To:", bold: true }),
                 new Paragraph({
                   text: billTo.prefix + " " + billTo.name + ".",
+                  bold: true,
                 }),
                 new Paragraph({ text: billTo.a1 + " " + billTo.a2 + "," }),
                 new Paragraph({ text: billTo.a3 + "," }),
@@ -288,7 +289,7 @@ const QuotationGenerator = ({ id }) => {
             new TableCell({
               children: [
                 new Paragraph({ text: "Ship To:", bold: true }),
-                new Paragraph({ text: shipTo.projectName + "." }),
+                new Paragraph({ text: shipTo.projectName + ".", bold: true }),
                 new Paragraph({ text: shipTo.a1 + " " + shipTo.a2 + "," }),
                 new Paragraph({ text: shipTo.a3 + "," }),
                 new Paragraph({ text: shipTo.a4 + "," }),

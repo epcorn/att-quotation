@@ -9,7 +9,7 @@ const SearchQuote = ({ setExtraQuery }) => {
   const dispatch = useDispatch();
   const [createdBy, setCreatedBy] = useState("");
   const [projectName, setProjectName] = useState("");
-  const [quotationNo, setQuotationNo] = useState("");
+  const [quotationNo, setQuotationNo] = useState("EPPL/ATT/QTN/");
   const [quotationDate, setQuotationDate] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     createdBy: false,
@@ -107,7 +107,7 @@ const SearchQuote = ({ setExtraQuery }) => {
         </div>
         <div>
           <Label htmlFor="projectName" className=" font-bold text-blue-600">
-            projectName
+            Project Name
           </Label>
           <div className="flex items-center justify-center">
             <TextInput
