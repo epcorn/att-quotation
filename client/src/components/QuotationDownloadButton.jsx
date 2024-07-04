@@ -355,10 +355,7 @@ const QuotationGenerator = ({ id }) => {
         ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Equipments:", data.equipments),
         ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
-        createInfoRow(
-          "Payment Terms:",
-          "Within 15 days form the date of submission of bill."
-        ),
+        createInfoRow("Payment Terms:", data.paymentTerms),
         ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Taxation:", data.taxation),
         //createInfoRow("Note:", data.note),

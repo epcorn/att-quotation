@@ -193,7 +193,7 @@ const quotationSchema = mongoose.Schema(
     },
     paymentTerms: {
       type: String,
-      default: "Within 15 days form the date of submission of bill.",
+      default: "Within 15 days from the date of submission of bill.",
     },
     taxation: {
       type: String,
