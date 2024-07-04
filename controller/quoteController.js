@@ -132,7 +132,6 @@ const quotes = async (req, res, next) => {
     const todayQuotes = await Quotation.countDocuments({
       createdAt: { $gte: today },
     });
-    quotes.map((q) => console.log(q.createdAt, q.updatedAt));
     res.status(200).json({
       message: "Quotation Created",
       result: quotes,
@@ -234,7 +233,6 @@ const update = async (req, res, next) => {
 };
 async function createQuoteArchiveEntry(quoteId, state, author) {
   const theArchive = await QuoteArchive.findOne({ quotationId: quoteId });
-  console.log(theArchive);
   if (theArchive) {
     theArchive.revisions.push({ state, author });
     await theArchive.save();

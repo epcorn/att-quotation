@@ -229,9 +229,6 @@ function NewQuote({ onClose }) {
   }
   function handleQuoteChange(e) {
     const { name, value } = e.target;
-    if (name === "salePerson") {
-      console.log(value);
-    }
     setQuote((prev) => ({ ...prev, [name]: value }));
   }
   function indianNumberFormat(number) {
@@ -501,9 +498,9 @@ function NewQuote({ onClose }) {
           >
             Copy BillTo/ShipTo
           </Button>
-          {/* <Button outline gradientMonochrome="cyan" onClick={dummyQuote}>
+          <Button outline gradientMonochrome="cyan" onClick={dummyQuote}>
             Dummy Quote
-          </Button> */}
+          </Button>
         </div>
         <div className="grid grid-cols-8 gap-4 border mb-4 rounded-md">
           <div className=" p-4 col-span-4">
@@ -516,6 +513,8 @@ function NewQuote({ onClose }) {
                 <Select name="billToAddress.prefix" onChange={handleAddress}>
                   <option></option>
                   <option value="M/s.">M/s.</option>
+                  <option value="Mr.">Mr.</option>
+                  <option value="Mrs.">Mrs.</option>
                 </Select>
               </div>
               <div className=" col-span-5">

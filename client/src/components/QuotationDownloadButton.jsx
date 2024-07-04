@@ -73,14 +73,18 @@ const QuotationGenerator = ({ id }) => {
         new Paragraph({ text: "" }),
         createAddressTable(data.billToAddress, data.shipToAddress),
         new Paragraph({ text: "" }),
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Kind Attention: ${data.kindAttentionPrefix} ${data.kindAttention}`,
-              bold: true,
-            }),
-          ],
-        }),
+        ...(data.kindAttention !== ""
+          ? [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Kind Attention: ${data.kindAttentionPrefix} ${data.kindAttention}`,
+                    bold: true,
+                  }),
+                ],
+              }),
+            ]
+          : []),
         new Paragraph({ text: "" }),
         new Paragraph({
           children: [
@@ -143,7 +147,7 @@ const QuotationGenerator = ({ id }) => {
         new Paragraph({
           children: [
             new TextRun({
-              text: `EXPRESS PESTICIDES PVT. LTD.`,
+              text: `For EXPRESS PESTICIDES PVT. LTD.`,
             }),
           ],
         }),
@@ -351,7 +355,10 @@ const QuotationGenerator = ({ id }) => {
         ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Equipments:", data.equipments),
         ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
-        createInfoRow("Payment Terms:", data.paymentTerms),
+        createInfoRow(
+          "Payment Terms:",
+          "Within 15 days form the date of submission of bill."
+        ),
         ...(sL <= 2 && aL <= 1 ? [createEmptyRow()] : []),
         createInfoRow("Taxation:", data.taxation),
         //createInfoRow("Note:", data.note),

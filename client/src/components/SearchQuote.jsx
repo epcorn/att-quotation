@@ -39,7 +39,6 @@ const SearchQuote = ({ setExtraQuery }) => {
     }
 
     try {
-      console.log(query);
       setLoading(true);
       const resultAction = await dispatch(searchQuotes(query.slice(1)));
       setExtraQuery(query.slice(1));

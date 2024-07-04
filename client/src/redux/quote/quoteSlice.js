@@ -354,6 +354,11 @@ export const quoteSlice = createSlice({
         state.quotations = payload.result;
         state.todayQuotations = payload.todayQuotes;
         state.totalQuotations = payload.totalQuotes;
+        if (payload.result.length < 9) {
+          state.showMore = false;
+        } else {
+          state.showMore = true;
+        }
       })
       .addCase(getQuotes.rejected, (state, { payload }) => {
         state.loading = false;

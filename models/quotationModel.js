@@ -141,7 +141,7 @@ const quotationSchema = mongoose.Schema(
     billToAddress: {
       prefix: {
         type: String,
-        enum: ["M/s."],
+        enum: ["M/s.", "Mr.", "Mrs.", "Miss."],
         default: "M/s.",
       },
       name: String,
@@ -193,7 +193,7 @@ const quotationSchema = mongoose.Schema(
     },
     paymentTerms: {
       type: String,
-      default: "Whitin 15 days form the date of submission of bill.",
+      default: "Within 15 days form the date of submission of bill.",
     },
     taxation: {
       type: String,

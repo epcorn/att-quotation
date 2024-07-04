@@ -30,17 +30,25 @@ function Diff({ quoteId }) {
     const difference = diff(oldObj, newObj);
     return Object.keys(difference);
   }
+  const [selectedRevision, setSelectedRevision] = useState(null);
+
+  const handleCardClick = (revision) => {
+    setSelectedRevision(revision);
+  };
+
+  const revisionDetails = selectedRevision || latest;
   return (
     <div className="container mx-auto p-4">
       {/* Quotation Header */}
       <div className="bg-gray-200 p-4 rounded-t-lg">
         <h1 className="text-xl font-bold">
-          Quotation No: {latest?.quotationNo}
+          Quotation No: {revisionDetails?.quotationNo}
         </h1>
         <p className="text-gray-600">
-          Date: {new Date(latest?.quotationDate).toLocaleDateString("en-GB")}
+          Date:{" "}
+          {new Date(revisionDetails?.quotationDate).toLocaleDateString("en-GB")}
         </p>
-        <p className="text-gray-600">Subject: {latest?.subject}</p>
+        <p className="text-gray-600">Subject: {revisionDetails?.subject}</p>
       </div>
 
       {/* Company & Contact Information */}
@@ -48,58 +56,66 @@ function Diff({ quoteId }) {
         <div>
           <h2 className="text-lg font-semibold">Bill To:</h2>
           <p>
-            {latest?.billToAddress?.prefix} {latest?.billToAddress?.name}
+            {revisionDetails?.billToAddress?.prefix}{" "}
+            {revisionDetails?.billToAddress?.name}
           </p>
           <p>
-            {latest?.billToAddress?.a1}, {latest?.billToAddress?.a2}
+            {revisionDetails?.billToAddress?.a1},{" "}
+            {revisionDetails?.billToAddress?.a2}
           </p>
           <p>
-            {latest?.billToAddress?.a3}, {latest?.billToAddress?.a4}
+            {revisionDetails?.billToAddress?.a3},{" "}
+            {revisionDetails?.billToAddress?.a4}
           </p>
           <p>
-            {latest?.billToAddress?.a5}, {latest?.billToAddress?.city},{" "}
-            {latest?.billToAddress?.pincode}
+            {revisionDetails?.billToAddress?.a5},{" "}
+            {revisionDetails?.billToAddress?.city},{" "}
+            {revisionDetails?.billToAddress?.pincode}
           </p>
         </div>
         <div>
           <h2 className="text-lg font-semibold">Ship To:</h2>
-          <p>{latest?.shipToAddress?.projectName}</p>
+          <p>{revisionDetails?.shipToAddress?.projectName}</p>
           <p>
-            {latest?.shipToAddress?.a1}, {latest?.shipToAddress?.a2}
+            {revisionDetails?.shipToAddress?.a1},{" "}
+            {revisionDetails?.shipToAddress?.a2}
           </p>
           <p>
-            {latest?.shipToAddress?.a3}, {latest?.shipToAddress?.a4}
+            {revisionDetails?.shipToAddress?.a3},{" "}
+            {revisionDetails?.shipToAddress?.a4}
           </p>
           <p>
-            {latest?.shipToAddress?.a5}, {latest?.shipToAddress?.city},{" "}
-            {latest?.shipToAddress?.pincode}
+            {revisionDetails?.shipToAddress?.a5},{" "}
+            {revisionDetails?.shipToAddress?.city},{" "}
+            {revisionDetails?.shipToAddress?.pincode}
           </p>
         </div>
         <div className="col-span-1 md:col-span-2">
           <h2 className="text-lg font-semibold">Kind Attention:</h2>
           <p>
-            {latest?.kindAttentionPrefix} {latest?.kindAttention}
+            {revisionDetails?.kindAttentionPrefix}{" "}
+            {revisionDetails?.kindAttention}
           </p>
-          <p>Reference: {latest?.reference}</p>
+          <p>Reference: {revisionDetails?.reference}</p>
         </div>
       </div>
 
       {/* Treatment & Specification Details */}
       <div className="bg-white p-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold">Treatment Type:</h2>
-        <p>{latest?.treatmentType}</p>
+        <p>{revisionDetails?.treatmentType}</p>
         <h2 className="text-lg font-semibold mt-4">Specification:</h2>
-        <p>{latest?.specification}</p>
+        <p>{revisionDetails?.specification}</p>
         <h2 className="text-lg font-semibold mt-4">Equipments:</h2>
-        <p>{latest?.equipments}</p>
+        <p>{revisionDetails?.equipments}</p>
       </div>
 
       {/* Payment & Taxation Information */}
       <div className="bg-white p-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold">Payment Terms:</h2>
-        <p>{latest?.paymentTerms}</p>
+        <p>{revisionDetails?.paymentTerms}</p>
         <h2 className="text-lg font-semibold mt-4">Taxation:</h2>
-        <p>{latest?.taxation}</p>
+        <p>{revisionDetails?.taxation}</p>
       </div>
 
       {/* Quotation Details Table */}
@@ -118,7 +134,7 @@ function Diff({ quoteId }) {
             </tr>
           </thead>
           <tbody>
-            {latest?.quoteInfo?.map((info, index) => (
+            {revisionDetails?.quoteInfo?.map((info, index) => (
               <tr key={index}>
                 <td className="border px-4 py-2">{info.workAreaType}</td>
                 <td className="border px-4 py-2">
@@ -153,12 +169,13 @@ function Diff({ quoteId }) {
       <div className="bg-gray-200 p-4 rounded-b-lg flex justify-between items-center">
         <div>
           <p>
-            Created By: {latest?.salesPerson?.prefix}{" "}
-            {latest?.salesPerson?.username} ({latest?.salesPerson?.initials})
+            Created By: {revisionDetails?.salesPerson?.prefix}{" "}
+            {revisionDetails?.salesPerson?.username} (
+            {revisionDetails?.salesPerson?.initials})
           </p>
         </div>
         <div>
-          <p>Approved: {latest?.approved ? "✓" : "✗"}</p>
+          <p>Approved: {revisionDetails?.approved ? "✓" : "✗"}</p>
         </div>
       </div>
 
@@ -167,7 +184,11 @@ function Diff({ quoteId }) {
         <h2 className="text-lg font-semibold">Revision History:</h2>
         <div className="mt-2 flex items-center justify-center flex-wrap gap-4">
           {archive?.map((revision, index) => (
-            <RevisionHistoryCard key={index} revision={revision} />
+            <RevisionHistoryCard
+              key={index}
+              revision={revision}
+              onClick={handleCardClick}
+            />
           ))}
         </div>
       </div>

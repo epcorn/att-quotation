@@ -59,7 +59,6 @@ export default function Create() {
       dispatch(showMoreQuotes({ startIndex }));
     }
   };
-  console.log(quotations[0]);
   return (
     <div className=" max-w-7xl mx-auto ">
       {loading ? <Loading /> : null}
