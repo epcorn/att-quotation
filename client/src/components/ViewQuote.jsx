@@ -258,23 +258,23 @@ const ViewQuote = forwardRef((props) => {
                     <tbody>
                       {applySupply.map((info) => (
                         <tr key={info._id} className="odd:bg-gray-50">
-                          <td className="px-4 py-2 border-b border-gray-200">
+                          <td className="px-4  py-2 border-b border-gray-200">
                             {info.workAreaType}
                           </td>
-                          <td className="px-4 py-2 border-b border-gray-200">
+                          <td className="px-4  py-2 border-b border-gray-200">
                             {info.workArea} {info.workAreaUnit}
                           </td>
-                          <td className="px-4 py-2 border-b border-gray-200">
-                            {`₹ ${info.chemicalRate} ${info.chemicalRateUnit}`}
+                          <td className="px-4  py-2 border-b border-gray-200">
+                            {`₹ ${info.applyRate} ${info.applyRateUnit}`}
                           </td>
-                          <td className="px-4 py-2 border-b border-gray-200">
+                          <td className="px-4  py-2 border-b border-gray-200">
+                            {`${info.chemicalQuantity} Ltr.`}
+                          </td>
+                          <td className="px-4  py-2 border-b border-gray-200">
                             {info.chemicalRate} {info.chemicalRateUnit}
                           </td>
-                          <td className="px-4 py-2 border-b border-gray-200">
+                          <td className="px-4  py-2 border-b border-gray-200">
                             {info.chemical}
-                          </td>
-                          <td className="px-4 py-2 border-b border-gray-200">
-                            {`₹ ${info.applyRate} ${info.applyRateUnit}`}
                           </td>
                         </tr>
                       ))}

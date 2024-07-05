@@ -112,20 +112,32 @@ function NewQuote({ onClose }) {
 
   function handleInfoChange(e) {
     const { name, value } = e.target;
+    if (name === "chemicalRateUnit" && radio) {
+      let applyRateU = value === "Lumpsum" ? "Lumpsum" : null;
+      setInfoObj((prev) => ({
+        ...prev,
+        [name]: value,
+        applyRateUnit: applyRateU,
+      }));
+      return;
+    }
     if (name === "workAreaUnit" && !radio) {
       let serviceRateU =
         value === "Sq.fts"
           ? "Per Sq.ft"
           : value === "Sq.mts"
           ? "Per Sq.mt"
-          : value === "Rn.fts"
-          ? "Per Rn.ft"
+          : value === "R.fts"
+          ? "Per R.ft"
+          : value === "R.mts"
+          ? "Per R.mt"
           : null;
       setInfoObj((prev) => ({
         ...prev,
         [name]: value,
         serviceRateUnit: serviceRateU,
       }));
+      return;
     }
     if (name === "workAreaUnit" && radio) {
       let applyRateU =
@@ -133,14 +145,19 @@ function NewQuote({ onClose }) {
           ? "Per Sq.ft"
           : value === "Sq.mts"
           ? "Per Sq.mt"
-          : value === "Rn.fts"
-          ? "Per Rn.ft"
+          : value === "R.fts"
+          ? "Per R.ft"
+          : value === "R.mts"
+          ? "Per R.mt"
+          : value === "Lumpsum"
+          ? "Lumpsum"
           : null;
       setInfoObj((prev) => ({
         ...prev,
         [name]: value,
         applyRateUnit: applyRateU,
       }));
+      return;
     }
     setInfoObj((prev) => ({
       ...prev,
@@ -165,7 +182,7 @@ function NewQuote({ onClose }) {
       }
     }
 
-    const workAreaFormted = indianNumberFormat(infoObj.workArea);
+    const workAreaFormted = Number(infoObj.workArea).toLocaleString("en-IN");
     let chemicalQuantityFormated = null;
     if (
       infoObj.chemicalQuantity === "" ||
@@ -174,7 +191,9 @@ function NewQuote({ onClose }) {
     ) {
       chemicalQuantityFormated = null;
     } else {
-      chemicalQuantityFormated = indianNumberFormat(infoObj.chemicalQuantity);
+      chemicalQuantityFormated = Number(
+        infoObj.chemicalQuantity
+      ).toLocaleString("en-IN");
     }
     let chemicalRateFormated = null;
     if (
@@ -230,17 +249,6 @@ function NewQuote({ onClose }) {
   function handleQuoteChange(e) {
     const { name, value } = e.target;
     setQuote((prev) => ({ ...prev, [name]: value }));
-  }
-  function indianNumberFormat(number) {
-    let numberStr = String(number);
-    let numberStrReversed = numberStr.split("").reverse().join("");
-    let formattedNumber = "";
-    for (let i = 0; i < numberStrReversed.length; i += 3) {
-      formattedNumber += numberStrReversed.slice(i, i + 3) + ",";
-    }
-    formattedNumber = formattedNumber.split("").reverse().join("").slice(1);
-
-    return formattedNumber;
   }
   function handleAddress(e) {
     const { name, value } = e.target;
@@ -882,8 +890,8 @@ function NewQuote({ onClose }) {
                       <option></option>
                       <option value="Sq.fts">Sq.fts</option>
                       <option value="Sq.mts">Sq.mts</option>
-                      <option value="Rn.fts">Rn.fts</option>
-                      <option value="Rn.mts">Rn.mts</option>
+                      <option value="R.fts">R.fts</option>
+                      <option value="R.mts">R.mts</option>
                     </Select>
                   </div>
                 </div>
@@ -907,8 +915,9 @@ function NewQuote({ onClose }) {
                         <option></option>
                         <option value="Per Sq.ft">Per Sq.ft</option>
                         <option value="Per Sq.mt">Per Sq.mt</option>
-                        <option value="Per Rn.ft">Per Rn.ft</option>
-                        <option value="Per Rn.mt">Per Rn.mt</option>
+                        <option value="Per R.ft">Per R.ft</option>
+                        <option value="Per R.mt">Per R.mt</option>
+                        <option value="Lumpsum">Lumpsum</option>
                       </Select>
                     </div>
                   </div>
@@ -931,6 +940,7 @@ function NewQuote({ onClose }) {
                       >
                         <option></option>
                         <option value="Per Ltr.">Per Ltr.</option>
+                        <option value="Lumpsum">Lumpsum</option>
                       </Select>
                     </div>
                   </div>
@@ -994,8 +1004,9 @@ function NewQuote({ onClose }) {
                         <option></option>
                         <option value="Per Sq.ft">Per Sq.ft</option>
                         <option value="Per Sq.mt">Per Sq.mt</option>
-                        <option value="Per Rn.ft">Per Rn.ft</option>
-                        <option value="Per Rn.mt">Per Rn.mt</option>
+                        <option value="Per R.ft">Per R.ft</option>
+                        <option value="Per R.mt">Per R.mt</option>
+                        <option value="Lumpsum">Lumpsum</option>
                       </Select>
                     </div>
                   </div>
