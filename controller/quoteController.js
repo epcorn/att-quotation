@@ -103,6 +103,10 @@ const create = async (req, res, next) => {
 
 const quotes = async (req, res, next) => {
   try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
     const sortDirection = req.query.order === "asc" ? 1 : -1;
@@ -117,6 +121,12 @@ const quotes = async (req, res, next) => {
       }),
       ...(req.query.quotationDate && {
         quotationDate: req.query.quotationDate,
+      }),
+      ...(req.query.createdAt && {
+        createdAt: {
+          $gte: startOfDay,
+          $lte: endOfDay,
+        },
       }),
       ...(req.query.quotationNo && { quotationNo: req.query.quotationNo }),
     })

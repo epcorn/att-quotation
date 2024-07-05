@@ -14,7 +14,12 @@ import { MdVerified } from "react-icons/md";
 import { CgDanger } from "react-icons/cg";
 import { useDispatch, useSelector } from "react-redux";
 import { getInitials } from "../redux/user/userSlice";
-import { getQuotes, approve, showMoreQuotes } from "../redux/quote/quoteSlice";
+import {
+  getQuotes,
+  approve,
+  showMoreQuotes,
+  searchQuotes,
+} from "../redux/quote/quoteSlice";
 import SearchQuote from "../components/SearchQuote";
 import Update from "./Update";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -23,6 +28,8 @@ import { toast } from "react-toastify";
 export default function Create() {
   const {
     quotations = [],
+    totalQuotations,
+    todayQuotations,
     loading,
     showMore,
   } = useSelector((state) => state.quote);
@@ -41,6 +48,20 @@ export default function Create() {
     dispatch(getQuotes());
   }, [dispatch]);
 
+  const handleToday = async () => {
+    try {
+      await dispatch(searchQuotes(`&createdAt=${true}`));
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
+  };
+  const handleTotal = async () => {
+    try {
+      await dispatch(getQuotes());
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
+  };
   async function handleClick(id) {
     if (!currentUser.rights.admin) {
       toast.error("Contact VNT to approve the Quotation.");
@@ -65,14 +86,40 @@ export default function Create() {
       <div className="h-full mt-3">
         <div className=" mt-2 h-full">
           <div className="h-16 text-lg flex items-center justify-between font-medium bg-[#6FDCE3] border border-black rounded-tl-lg rounded-br-lg">
-            <div className="flex-grow mr-4 ">
+            <div className="flex-grow mr-4 flex items-center justify-evenly ">
+              <div
+                className="bg-[#ECCEAE] hover:bg-[#E68369] rounded-md  p-1"
+                onClick={handleTotal}
+              >
+                <p>
+                  Total: <span>{totalQuotations}</span>
+                </p>
+              </div>
+              <div
+                className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1"
+                onClick={handleToday}
+              >
+                <p>
+                  Today: <span>{todayQuotations}</span>
+                </p>
+              </div>
               <div className="flex items-center justify-center">
                 <h3>Recent Quotations</h3>
+              </div>
+              <div className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1">
+                <p>
+                  Revisied: <span>{totalQuotations}</span>
+                </p>
+              </div>
+              <div className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1">
+                <p>
+                  Pending Appr: <span>{todayQuotations}</span>
+                </p>
               </div>
             </div>
             <div>
               <button
-                className="bg-[#FFFDB5] hover:bg-yellow-200 font-medium py-2 px-4 rounded mr-2"
+                className="bg-[#FFFDB5] hover:bg-yellow-200 font-medium py-2 px-4 rounded-tl-lg rounded-br-lg mr-2"
                 onClick={() => setCreateModel(true)}
               >
                 Create Quotation

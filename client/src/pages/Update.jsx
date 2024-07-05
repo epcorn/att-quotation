@@ -76,6 +76,78 @@ function Update({ quoteId, onClose }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-evenly gap-4 mb-4 flex-wrap">
+        <div className="max-w-full">
+          <div className="mb-2 block">
+            <Label htmlFor="quotationDate" value="Quotation Date" />
+          </div>
+          <input
+            name="quotationDate"
+            type="date"
+            value={quote.quotationDate}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="max-w-full grid grid-cols-6">
+          <div className="col-span-1">
+            <div className="mb-2 ">
+              <Label htmlFor="kindAttentionPrefix">
+                <span>Prefix</span>
+                <span className=" text-red-500">*</span>
+              </Label>
+            </div>
+            <Select
+              name="kindAttentionPrefix"
+              value={quote.kindAttentionPrefix}
+              onChange={handleChange}
+            >
+              <option></option>
+              <option value="Mr.">Mr.</option>
+              <option value="Ms.">Ms.</option>
+              <option value="NA">NA</option>
+            </Select>
+          </div>
+          <div className="col-span-5">
+            <div className="mb-2 block">
+              <Label htmlFor="kindAttention">
+                <span>Kind Attn: </span>
+                <span className=" text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              name="kindAttention"
+              onChange={handleChange}
+              value={quote.kindAttention}
+            />
+          </div>
+        </div>
+        <div className="col-span-5">
+          <div className="mb-2 block">
+            <Label htmlFor="emailTo">
+              <span>Email To: </span>
+            </Label>
+          </div>
+          <TextInput
+            type="email"
+            name="emailTo"
+            onChange={handleChange}
+            value={quote.emailTo}
+          />
+        </div>
+        <div className="col-span-5">
+          <div className="mb-2 block">
+            <Label htmlFor="quotationNo">
+              <span>Quotation No: </span>
+              <span className=" text-red-500">*</span>
+            </Label>
+          </div>
+          <TextInput
+            name="quotationNo"
+            onChange={handleChange}
+            value={quote.quotationNo}
+          />
+        </div>
+      </div>
       <div className="grid grid-cols-8 gap-4 border mb-4 rounded-md">
         <div className=" p-4 col-span-4">
           <h2>Bill To Address</h2>
@@ -364,11 +436,22 @@ function Update({ quoteId, onClose }) {
             >
               <div className="col-span-3 border p-1">
                 <Label>Work Area Type: </Label>
-                <TextInput
+                <Select
                   name="quoteInfo.workAreaType"
-                  value={type.workAreaType}
                   onChange={handleChange}
-                ></TextInput>
+                  value={type.workAreaType}
+                  data-id={type._id}
+                >
+                  <option></option>
+                  <option>Basement Area</option>
+                  <option>Retaining Wall</option>
+                  <option>Raft</option>
+                  <option>Plinth</option>
+                  <option>Periphery</option>
+                  <option>Floor</option>
+                  <option>Basement Area (Horizontal)</option>
+                  <option>Basement Area (Vertical)</option>
+                </Select>
               </div>
               <div className="col-span-3 border grid grid-cols-4 gap-1 p-1">
                 <div className="col-span-2">

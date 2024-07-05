@@ -248,6 +248,10 @@ function NewQuote({ onClose }) {
   }
   function handleQuoteChange(e) {
     const { name, value } = e.target;
+    if (name === "kindAttentionPrefix" && value === "NA") {
+      setQuote((prev) => ({ ...prev, kindAttention: "NA", [name]: value }));
+      return;
+    }
     setQuote((prev) => ({ ...prev, [name]: value }));
   }
   function handleAddress(e) {
@@ -429,6 +433,7 @@ function NewQuote({ onClose }) {
               <div className="mb-2 ">
                 <Label htmlFor="kindAttentionPrefix">
                   <span>Prefix</span>
+                  <span className=" text-red-500">*</span>
                 </Label>
               </div>
               <Select
@@ -439,12 +444,14 @@ function NewQuote({ onClose }) {
                 <option></option>
                 <option value="Mr.">Mr.</option>
                 <option value="Ms.">Ms.</option>
+                <option value="NA">NA</option>
               </Select>
             </div>
             <div className="col-span-5">
               <div className="mb-2 block">
                 <Label htmlFor="kindAttention">
                   <span>Kind Attn: </span>
+                  <span className=" text-red-500">*</span>
                 </Label>
               </div>
               <TextInput
