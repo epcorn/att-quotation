@@ -7,6 +7,20 @@ import Loading from "./Loading";
 import { saprateQuoteInfo } from "../funtions/funtion.js";
 import { Button } from "flowbite-react";
 
+function longestKey() {
+  return Math.max(
+    "Quotation No".length,
+    "Date".length,
+    "Subject".length,
+    "Reference".length,
+    "Treatment Type".length,
+    "Specification".length,
+    "Equipments".length,
+    "Payment Terms".length,
+    "Taxation".length,
+    "Kind Attention".length
+  );
+}
 // eslint-disable-next-line react/prop-types, react/display-name
 const ViewQuote = forwardRef((props) => {
   {
@@ -39,20 +53,7 @@ const ViewQuote = forwardRef((props) => {
         // close();
       },
     });
-    // eslint-disable-next-line no-inner-declarations
-    function longestKey() {
-      Math.max(
-        "Quotation No".length,
-        "Date".length,
-        "Subject".length,
-        "Reference".length,
-        "Treatment Type".length,
-        "Specification".length,
-        "Equipments".length,
-        "Payment Terms".length,
-        "Taxation".length
-      );
-    }
+
     return (
       <>
         <div
@@ -121,17 +122,24 @@ const ViewQuote = forwardRef((props) => {
             </div>
           </div>
 
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Kind Attention:</h2>
-            <p className="text-gray-600 whitespace-pre-line">
-              {quote.kindAttentionPrefix} {quote.kindAttention}
-            </p>
-          </div>
+          {quote.kindAttention === "NA" || quote.kindAttention === "" ? null : (
+            <div className="mb-6 flex items-center">
+              <div
+                className="text-lg font-semibold mr-2"
+                style={{ minWidth: `${longestKey() + 2}ch` }}
+              >
+                Kind Attention:
+              </div>
+              <p className="text-gray-600 whitespace-pre-line">
+                {quote.kindAttentionPrefix} {quote.kindAttention}
+              </p>
+            </div>
+          )}
 
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Subject:
             </div>
@@ -141,7 +149,7 @@ const ViewQuote = forwardRef((props) => {
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Reference:
             </div>
@@ -151,7 +159,7 @@ const ViewQuote = forwardRef((props) => {
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Treatment Type:
             </div>
@@ -163,7 +171,7 @@ const ViewQuote = forwardRef((props) => {
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Specification:
             </div>
@@ -173,7 +181,7 @@ const ViewQuote = forwardRef((props) => {
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Equipments:
             </div>
@@ -183,7 +191,7 @@ const ViewQuote = forwardRef((props) => {
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Payment Terms:
             </div>
@@ -193,17 +201,24 @@ const ViewQuote = forwardRef((props) => {
           <div className="mb-6 flex">
             <div
               className="font-semibold mr-2"
-              style={{ minWidth: `${longestKey + 2}ch` }}
+              style={{ minWidth: `${longestKey() + 2}ch` }}
             >
               Taxation:
             </div>
             <div className="w-2/3 text-gray-600">{quote.taxation}</div>
           </div>
 
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Note:</h2>
-            <p className="text-gray-600 whitespace-pre-line">{quote.note}</p>
-          </div>
+          {quote.note !== "" ? (
+            <div className="mb-6">
+              <div
+                className="font-semibold mb-2"
+                style={{ minWidth: `${longestKey() + 2}ch` }}
+              >
+                Note:
+              </div>
+              <p className="text-gray-600 whitespace-pre-line">{quote.note}</p>
+            </div>
+          ) : null}
 
           <div>
             <h2 className="text-lg font-semibold mb-4">Quote Information:</h2>

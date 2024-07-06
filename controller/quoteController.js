@@ -103,14 +103,21 @@ const create = async (req, res, next) => {
 
 const quotes = async (req, res, next) => {
   try {
-    const startOfDay = new Date();
+    // Parse and set start and end of the day for fromDate and toDate
+    const startOfDay = req.query.fromDate
+      ? new Date(req.query.fromDate)
+      : new Date();
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
+
+    const endOfDay = req.query.toDate ? new Date(req.query.toDate) : new Date();
     endOfDay.setHours(23, 59, 59, 999);
+
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
     const sortDirection = req.query.order === "asc" ? 1 : -1;
-    const quotes = await Quotation.find({
+
+    // Build the query object
+    const query = {
       ...(req.query.createdBy && {
         createdBy: { $regex: new RegExp(req.query.createdBy, "i") },
       }),
@@ -119,31 +126,44 @@ const quotes = async (req, res, next) => {
           $regex: new RegExp(req.query.projectName, "i"),
         },
       }),
-      ...(req.query.quotationDate && {
-        quotationDate: req.query.quotationDate,
-      }),
-      ...(req.query.createdAt && {
-        createdAt: {
-          $gte: startOfDay,
-          $lte: endOfDay,
-        },
-      }),
       ...(req.query.quotationNo && { quotationNo: req.query.quotationNo }),
-    })
+    };
+
+    // Add date filters to the query
+    if (req.query.fromDate && req.query.toDate) {
+      query.quotationDate = {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      };
+    } else if (req.query.fromDate) {
+      query.quotationDate = {
+        $gte: startOfDay,
+      };
+    } else if (req.query.toDate) {
+      query.quotationDate = {
+        $lte: endOfDay,
+      };
+    }
+
+    // Fetch the quotes based on the constructed query
+    const quotes = await Quotation.find(query)
       .lean()
       .populate("createdBy", "username")
       .sort({ updatedAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
 
+    // Get today's date for counting today's quotes
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     const totalQuotes = await Quotation.countDocuments();
     const todayQuotes = await Quotation.countDocuments({
       createdAt: { $gte: today },
     });
+
     res.status(200).json({
-      message: "Quotation Created",
+      message: "Quotations Retrieved",
       result: quotes,
       totalQuotes,
       todayQuotes,

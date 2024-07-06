@@ -108,12 +108,12 @@ export default function Create() {
               </div>
               <div className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1">
                 <p>
-                  Revisied: <span>{totalQuotations}</span>
+                  Revisied: <span>00</span>
                 </p>
               </div>
               <div className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1">
                 <p>
-                  Pending Appr: <span>{todayQuotations}</span>
+                  Pending Appr: <span>00</span>
                 </p>
               </div>
             </div>
@@ -133,6 +133,7 @@ export default function Create() {
             <Table>
               <Table.Head>
                 <Table.HeadCell>Quotation No</Table.HeadCell>
+                <Table.HeadCell>Quotation Date</Table.HeadCell>
                 <Table.HeadCell>Created By</Table.HeadCell>
                 <Table.HeadCell>Project Name</Table.HeadCell>
                 <Table.HeadCell>Timestamp</Table.HeadCell>
@@ -164,10 +165,16 @@ export default function Create() {
                           {ticket.quotationNo ? ticket.quotationNo : ticket._id}
                         </div>
                       </Table.Cell>
+                      <Table.Cell>
+                        {new Date(ticket.quotationDate).toLocaleDateString(
+                          "en-GB"
+                        )}
+                      </Table.Cell>
                       <Table.Cell>{ticket.createdBy?.username}</Table.Cell>
                       <Table.Cell>
                         {ticket.shipToAddress.projectName}
                       </Table.Cell>
+
                       <Table.Cell>
                         <TimeAgo date={new Date(ticket.updatedAt)} />
                       </Table.Cell>

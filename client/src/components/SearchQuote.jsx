@@ -10,11 +10,13 @@ const SearchQuote = ({ setExtraQuery }) => {
   const [createdBy, setCreatedBy] = useState("");
   const [projectName, setProjectName] = useState("");
   const [quotationNo, setQuotationNo] = useState("EPPL/ATT/QTN/");
-  const [quotationDate, setQuotationDate] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     createdBy: false,
     projectName: false,
-    quotationDate: false,
+    fromDate: false,
+    toDate: false,
     quotationNo: false,
   });
   const [loading, setLoading] = useState(false);
@@ -30,8 +32,11 @@ const SearchQuote = ({ setExtraQuery }) => {
       query += `&projectName=${projectName}`;
     }
 
-    if (selectedFilters.quotationDate) {
-      query += `&quotationDate=${quotationDate}`;
+    if (selectedFilters.fromDate) {
+      query += `&fromDate=${fromDate}`;
+    }
+    if (selectedFilters.toDate) {
+      query += `&toDate=${toDate}`;
     }
 
     if (selectedFilters.quotationNo) {
@@ -133,26 +138,53 @@ const SearchQuote = ({ setExtraQuery }) => {
         </div>
         <div>
           <Label htmlFor="" className="font-bold text-blue-600">
-            Quotation Date
+            Quotation Date/From
           </Label>
           <div className="flex items-center justify-center">
             <input
               type="date"
-              value={quotationDate}
-              name="quotationDate"
-              id="quotationDate"
+              value={fromDate}
+              name="fromDate"
+              id="fromDate"
               className="w-full px-3 py-2 border rounded-md"
-              onChange={(e) => setQuotationDate(e.target.value)}
+              onChange={(e) => setFromDate(e.target.value)}
             ></input>
             <Checkbox
               type="checkbox"
-              checked={selectedFilters.quotationDate}
+              checked={selectedFilters.fromDate}
               className=" ml-1"
-              name="quotationDate"
+              name="fromDate"
               onChange={(e) =>
                 setSelectedFilters({
                   ...selectedFilters,
-                  quotationDate: e.target.checked,
+                  fromDate: e.target.checked,
+                })
+              }
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="" className="font-bold text-blue-600">
+            Quotation Date/To
+          </Label>
+          <div className="flex items-center justify-center">
+            <input
+              type="date"
+              value={toDate}
+              name="toDate"
+              id="toDate"
+              className="w-full px-3 py-2 border rounded-md"
+              onChange={(e) => setToDate(e.target.value)}
+            ></input>
+            <Checkbox
+              type="checkbox"
+              checked={selectedFilters.toDate}
+              className=" ml-1"
+              name="toDate"
+              onChange={(e) =>
+                setSelectedFilters({
+                  ...selectedFilters,
+                  toDate: e.target.checked,
                 })
               }
             />
