@@ -513,9 +513,9 @@ function NewQuote({ onClose }) {
           >
             Copy BillTo/ShipTo
           </Button>
-          <Button outline gradientMonochrome="cyan" onClick={dummyQuote}>
+          {/* <Button outline gradientMonochrome="cyan" onClick={dummyQuote}>
             Dummy Quote
-          </Button>
+          </Button> */}
         </div>
         <div className="grid grid-cols-8 gap-4 border mb-4 rounded-md">
           <div className=" p-4 col-span-4">
