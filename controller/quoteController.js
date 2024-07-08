@@ -149,7 +149,7 @@ const quotes = async (req, res, next) => {
     const quotes = await Quotation.find(query)
       .lean()
       .populate("createdBy", "username")
-      .sort({ updatedAt: sortDirection })
+      .sort({ quotationDate: sortDirection })
       .skip(startIndex)
       .limit(limit);
 

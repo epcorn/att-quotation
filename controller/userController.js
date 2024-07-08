@@ -8,7 +8,9 @@ const login = async (req, res, next) => {
     return next(errorHandler(400, "All fields are requird"));
   }
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({
+      $or: [{ username: username }, { initials: username }],
+    });
     if (!user) {
       return next(errorHandler(404, "user not found!"));
     }
