@@ -43,7 +43,7 @@ export default function Header() {
       </div>
       <Navbar.Collapse>
         <Navbar.Link as="div" active={location.pathname === "/" ? true : false}>
-          <Link to="/">Home</Link>
+          <Link to="/">Dashboard</Link>
         </Navbar.Link>
         {(currentUser?.rights.create || currentUser?.rights.admin) && (
           <Navbar.Link

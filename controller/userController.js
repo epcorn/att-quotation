@@ -123,7 +123,7 @@ const deleteUser = async (req, res, next) => {
 const initials = async (req, res, next) => {
   try {
     const initials = await User.find({}, ["initials", "username"]);
-    res.status(200).json({ message: "Initials of Users", result: initials });
+    res.status(200).json({ result: initials });
   } catch (error) {
     next(error);
   }

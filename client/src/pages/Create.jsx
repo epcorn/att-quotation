@@ -14,12 +14,7 @@ import { MdVerified } from "react-icons/md";
 import { CgDanger } from "react-icons/cg";
 import { useDispatch, useSelector } from "react-redux";
 import { getInitials } from "../redux/user/userSlice";
-import {
-  getQuotes,
-  approve,
-  showMoreQuotes,
-  searchQuotes,
-} from "../redux/quote/quoteSlice";
+import { getQuotes, approve, showMoreQuotes } from "../redux/quote/quoteSlice";
 import SearchQuote from "../components/SearchQuote";
 import Update from "./Update";
 import { unwrapResult } from "@reduxjs/toolkit";
@@ -28,8 +23,6 @@ import { toast } from "react-toastify";
 export default function Create() {
   const {
     quotations = [],
-    totalQuotations,
-    todayQuotations,
     loading,
     showMore,
   } = useSelector((state) => state.quote);
@@ -44,24 +37,12 @@ export default function Create() {
   const [extraQuery, setExtraQuery] = useState(null);
 
   useEffect(() => {
-    dispatch(getInitials());
-    dispatch(getQuotes());
-  }, [dispatch]);
+    if (quotations.length <= 0) {
+      dispatch(getInitials());
+      dispatch(getQuotes());
+    }
+  }, [dispatch, quotations]);
 
-  const handleToday = async () => {
-    try {
-      await dispatch(searchQuotes(`&createdAt=${true}`));
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    }
-  };
-  const handleTotal = async () => {
-    try {
-      await dispatch(getQuotes());
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    }
-  };
   async function handleClick(id) {
     if (id) {
       toast.error("Contact VNT to approve the Quotation.");
@@ -87,34 +68,8 @@ export default function Create() {
         <div className=" mt-2 h-full">
           <div className="h-16 text-lg flex items-center justify-between font-medium bg-[#6FDCE3] border border-black rounded-tl-lg rounded-br-lg">
             <div className="flex-grow mr-4 flex items-center justify-evenly ">
-              <div
-                className="bg-[#ECCEAE] hover:bg-[#E68369] rounded-md  p-1"
-                onClick={handleTotal}
-              >
-                <p>
-                  Total: <span>{totalQuotations}</span>
-                </p>
-              </div>
-              <div
-                className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1"
-                onClick={handleToday}
-              >
-                <p>
-                  Today: <span>{todayQuotations}</span>
-                </p>
-              </div>
               <div className="flex items-center justify-center">
                 <h3>Recent Quotations</h3>
-              </div>
-              <div className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1">
-                <p>
-                  Revisied: <span>00</span>
-                </p>
-              </div>
-              <div className="bg-[#ECCEAE] hover:bg-[#E68369]  rounded-md  p-1">
-                <p>
-                  Pending Appr: <span>00</span>
-                </p>
               </div>
             </div>
             <div>
