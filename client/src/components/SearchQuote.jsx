@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { Button, Checkbox, Label, Spinner, TextInput } from "flowbite-react";
-import { useDispatch } from "react-redux";
+import {
+  Button,
+  Checkbox,
+  Label,
+  Select,
+  Spinner,
+  TextInput,
+} from "flowbite-react";
+import { useDispatch, useSelector } from "react-redux";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { searchQuotes } from "../redux/quote/quoteSlice";
 
@@ -12,6 +19,7 @@ const SearchQuote = ({ setExtraQuery }) => {
   const [quotationNo, setQuotationNo] = useState("EPPL/ATT/QTN/");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const { initials } = useSelector((state) => state.user);
   const [selectedFilters, setSelectedFilters] = useState({
     createdBy: false,
     projectName: false,
@@ -55,7 +63,6 @@ const SearchQuote = ({ setExtraQuery }) => {
       console.error("Error fetching tickets:", error);
     }
   };
-
   return (
     <div className=" max-w-7xl mx-auto">
       <div className="flex items-center  sm:justify-evenly gap-3 pr-6 flex-wrap">
@@ -90,13 +97,20 @@ const SearchQuote = ({ setExtraQuery }) => {
             Created By
           </Label>
           <div className="flex items-center justify-center">
-            <TextInput
-              type="text"
-              value={createdBy}
+            <Select
               name="createdBy"
               id="createdBy"
+              value={createdBy}
               onChange={(e) => setCreatedBy(e.target.value)}
-            />
+            >
+              <option></option>
+              {initials.length > 0 &&
+                initials.map((initial) => (
+                  <option value={initial._id} key={initial._id}>
+                    {initial.initials} {initial.username}
+                  </option>
+                ))}
+            </Select>
             <Checkbox
               name="createdBy"
               checked={selectedFilters.createdBy}

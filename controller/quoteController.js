@@ -119,14 +119,16 @@ const quotes = async (req, res, next) => {
     // Build the query object
     const query = {
       ...(req.query.createdBy && {
-        createdBy: { $regex: new RegExp(req.query.createdBy, "i") },
+        createdBy: req.query.createdBy,
       }),
       ...(req.query.projectName && {
         "shipToAddress.projectName": {
           $regex: new RegExp(req.query.projectName, "i"),
         },
       }),
-      ...(req.query.quotationNo && { quotationNo: req.query.quotationNo }),
+      ...(req.query.quotationNo && {
+        quotationNo: { $regex: new RegExp(req.query.quotationNo, "i") },
+      }),
     };
 
     // Add date filters to the query
@@ -149,7 +151,7 @@ const quotes = async (req, res, next) => {
     const quotes = await Quotation.find(query)
       .lean()
       .populate("createdBy", "username")
-      .sort({ quotationDate: sortDirection })
+      .sort({ updatedAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
 

@@ -33,7 +33,7 @@ export default function Create() {
     loading,
     showMore,
   } = useSelector((state) => state.quote);
-  const { currentUser } = useSelector((state) => state.user);
+  //const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [createModel, setCreateModel] = useState(false);
   const [viewModel, setViewModel] = useState(false);

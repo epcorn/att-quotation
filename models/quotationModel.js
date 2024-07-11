@@ -218,10 +218,6 @@ const quotationSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    emailTo: {
-      type: String,
-      default: null,
-    },
     quoteInfo: [{ type: mongoose.Schema.Types.ObjectId, ref: "QuoteInfo" }],
   },
   { timestamps: true }

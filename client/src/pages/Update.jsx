@@ -475,6 +475,7 @@ function Update({ quoteId, onClose }) {
                     <option value="Sq.fts">Sq.fts</option>
                     <option value="Sq.mts">Sq.mts</option>
                     <option value="Rn.fts">Rn.fts</option>
+                    <option value=""></option>
                   </Select>
                 </div>
               </div>
@@ -501,6 +502,7 @@ function Update({ quoteId, onClose }) {
                       <option value="Per Sq.ft">Per Sq.ft</option>
                       <option value="Per Sq.mt">Per Sq.mt</option>
                       <option value="Per Rn.ft">Per Rn.ft</option>
+                      <option value="Lumpsum">Lumpsum</option>
                     </Select>
                   </div>
                 </div>
@@ -525,6 +527,7 @@ function Update({ quoteId, onClose }) {
                     >
                       <option></option>
                       <option value="Per Ltr.">Per Ltr.</option>
+                      <option value="Lumpsum">Lumpsum</option>
                     </Select>
                   </div>
                 </div>
@@ -591,6 +594,7 @@ function Update({ quoteId, onClose }) {
                       <option value="Per Sq.ft">Per Sq.ft</option>
                       <option value="Per Sq.mt">Per Sq.mt</option>
                       <option value="Per Rn.ft">Per Rn.ft</option>
+                      <option value="Lumpsum">Lumpsum</option>
                     </Select>
                   </div>
                 </div>

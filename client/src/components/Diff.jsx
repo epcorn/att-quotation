@@ -4,19 +4,28 @@ import { useEffect, useState } from "react";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { diff } from "deep-object-diff";
 import RevisionHistoryCard from "./RevisionHistoryCard";
+import Loading from "./Loading";
 
 // eslint-disable-next-line react/prop-types
 function Diff({ quoteId }) {
   const dispatch = useDispatch();
   const [latest, setLatest] = useState({});
   const [archive, setArchive] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     (async () => {
-      const resultAction = await dispatch(archiveData(quoteId));
-      const result = unwrapResult(resultAction);
-      const { archive, ...rest } = result.result;
-      setLatest(rest);
-      setArchive(archive?.revisions);
+      try {
+        setLoading(true);
+        const resultAction = await dispatch(archiveData(quoteId));
+        const result = unwrapResult(resultAction);
+        const { archive, ...rest } = result.result;
+        setLatest(rest);
+        setArchive(archive?.revisions);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+      }
     })();
   }, [dispatch, quoteId]);
 
@@ -39,6 +48,7 @@ function Diff({ quoteId }) {
   const revisionDetails = selectedRevision || latest;
   return (
     <div className="container mx-auto p-4">
+      {loading && <Loading />}
       {/* Quotation Header */}
       <div className="bg-gray-200 p-4 rounded-t-lg">
         <h1 className="text-xl font-bold">
@@ -188,6 +198,11 @@ function Diff({ quoteId }) {
               key={index}
               revision={revision}
               onClick={handleCardClick}
+              active={
+                revision.state.quotationNo === revisionDetails?.quotationNo
+                  ? true
+                  : false
+              }
             />
           ))}
         </div>
