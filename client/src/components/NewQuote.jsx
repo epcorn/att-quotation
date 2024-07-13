@@ -4,9 +4,11 @@ import {
   Label,
   Radio,
   Select,
+  Table,
   TextInput,
   Textarea,
 } from "flowbite-react";
+import { GiCancel } from "react-icons/gi";
 import { useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
 import CustomModal from "./CustomModal";
@@ -15,6 +17,11 @@ import { createQuote } from "../redux/quote/quoteSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import Loading from "./Loading";
 import { toast } from "react-toastify";
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet(
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+  21
+);
 
 // eslint-disable-next-line react/prop-types
 function NewQuote({ onClose }) {
@@ -40,6 +47,7 @@ function NewQuote({ onClose }) {
         a5: "",
         city: "",
         pincode: "",
+        kci: [],
       },
       shipToAddress: {
         projectName: "",
@@ -50,6 +58,7 @@ function NewQuote({ onClose }) {
         a5: "",
         city: "",
         pincode: "",
+        kci: [],
       },
       specification: "",
       emailTo: "",
@@ -80,12 +89,28 @@ function NewQuote({ onClose }) {
     applyRate: "",
     applyRateUnit: "",
   });
+  const [kciObjBill, setKciObjBill] = useState({
+    id: nanoid(),
+    name: "",
+    designation: "",
+    contact: "",
+    email: "",
+  });
+  const [kciObjShip, setKciObjShip] = useState({
+    id: nanoid(),
+    name: "",
+    designation: "",
+    contact: "",
+    email: "",
+  });
   const [quote, setQuote] = useState(getInitialQuoteState());
   const [subRef, setSubRef] = useState("");
   const [infoArray, setInfoArray] = useState(getInitialInfoArrayState());
   const [types, setTypes] = useState([]);
   const [radio, setRadio] = useState(false);
   const [areaTypeModel, setAreaTypeModel] = useState(false);
+  const [validKciBill, setValidKciBill] = useState(false);
+  const [validKciShip, setValidKciShip] = useState(false);
   const dispatch = useDispatch();
   const { initials } = useSelector((state) => state.user);
 
@@ -241,6 +266,99 @@ function NewQuote({ onClose }) {
     });
     setTypes([]);
   }
+  function deleteKciBill(id) {
+    setQuote((prev) => ({
+      ...prev,
+      billToAddress: {
+        ...prev.billToAddress,
+        kci: prev.billToAddress.kci.filter((obj) => obj.id !== id),
+      },
+    }));
+  }
+  function deleteKciShip(id) {
+    setQuote((prev) => ({
+      ...prev,
+      shipToAddress: {
+        ...prev.shipToAddress,
+        kci: prev.shipToAddress.kci.filter((obj) => obj.id !== id),
+      },
+    }));
+  }
+
+  function handleKciBillTo(e) {
+    const { name, value } = e.target;
+    setKciObjBill((prev) => ({ ...prev, [name]: value }));
+  }
+  function handleKciShipTo(e) {
+    const { name, value } = e.target;
+    setKciObjShip((prev) => ({ ...prev, [name]: value }));
+  }
+  useEffect(() => {
+    if (
+      kciObjBill.name !== "" &&
+      (kciObjBill.contact !== "" || kciObjBill.email !== "")
+    ) {
+      setValidKciBill(true);
+    } else {
+      setValidKciBill(false);
+    }
+  }, [kciObjBill.contact, kciObjBill.email, kciObjBill.name]);
+  useEffect(() => {
+    if (
+      kciObjShip.name !== "" &&
+      (kciObjShip.contact !== "" || kciObjShip.email !== "")
+    ) {
+      setValidKciShip(true);
+    } else {
+      setValidKciShip(false);
+    }
+  }, [kciObjShip.contact, kciObjShip.email, kciObjShip.name]);
+  function moreKciBillTo() {
+    if (
+      kciObjBill.name !== "" &&
+      (kciObjBill.contact !== "" || kciObjBill.email !== "")
+    ) {
+      setQuote((prev) => ({
+        ...prev,
+        billToAddress: {
+          ...prev.billToAddress,
+          kci: [...prev.billToAddress.kci, kciObjBill],
+        },
+      }));
+      setKciObjBill({
+        id: nanoid(),
+        name: "",
+        designation: "",
+        contact: "",
+        email: "",
+      });
+    } else {
+      return toast.error("This much info is not suffiecient.");
+    }
+  }
+  function moreKciShipTo() {
+    if (
+      kciObjShip.name !== "" &&
+      (kciObjShip.contact !== "" || kciObjShip.email !== "")
+    ) {
+      setQuote((prev) => ({
+        ...prev,
+        shipToAddress: {
+          ...prev.shipToAddress,
+          kci: [...prev.shipToAddress.kci, kciObjShip],
+        },
+      }));
+      setKciObjShip({
+        id: nanoid(),
+        name: "",
+        designation: "",
+        contact: "",
+        email: "",
+      });
+    } else {
+      return toast.error("This much info is not suffiecient.");
+    }
+  }
   function handleDeleteInfo(workAreaType) {
     setInfoArray((prev) =>
       prev.filter((info) => info.workAreaType !== workAreaType)
@@ -315,6 +433,7 @@ function NewQuote({ onClose }) {
           a5: "Opposite Hell",
           city: "Mumbai",
           pincode: "400030",
+          kci: [],
         },
         shipToAddress: {
           projectName: "Prestige City Rehab Project",
@@ -325,6 +444,7 @@ function NewQuote({ onClose }) {
           a5: "Opposite Hell",
           city: "Mumbai",
           pincode: "400030",
+          kci: [],
         },
         kindAttentionPrefix: "Mr.",
         kindAttention: "Malahari Naik",
@@ -367,7 +487,14 @@ function NewQuote({ onClose }) {
   function handleSubRef(e) {
     const { value } = e.target;
     setSubRef(value);
-    setQuote((prev) => ({ ...prev, reference: value }));
+    if (quote.reference === "" || quote.reference === " ") {
+      setQuote((prev) => ({ ...prev, reference: value }));
+    } else {
+      setQuote((prev) => ({
+        ...prev,
+        reference: ` ${prev.reference}>. ${value}`,
+      }));
+    }
   }
   async function handleSubmit(e) {
     e.preventDefault();
@@ -513,9 +640,9 @@ function NewQuote({ onClose }) {
           >
             Copy BillTo/ShipTo
           </Button>
-          {/* <Button outline gradientMonochrome="cyan" onClick={dummyQuote}>
+          <Button outline gradientMonochrome="cyan" onClick={dummyQuote}>
             Dummy Quote
-          </Button> */}
+          </Button>
         </div>
         <div className="grid grid-cols-8 gap-4 border mb-4 rounded-md">
           <div className=" p-4 col-span-4">
@@ -644,6 +771,87 @@ function NewQuote({ onClose }) {
                 value={quote.billToAddress.pincode}
               />
             </div>
+            <div className="max-w-full flex justify-between items-center border-t border-l border-r mt-1">
+              <div></div>
+              <h2>KCI</h2>
+              <Button
+                onClick={moreKciBillTo}
+                gradientDuoTone={validKciBill ? "tealToLime" : "pinkToOrange"}
+                size="xs"
+                className="border"
+              >
+                +
+              </Button>
+            </div>
+            <div className="max-w-full flex gap-1 border-b border-l border-r">
+              <div className="">
+                <div className="mb-2 block">
+                  <Label htmlFor="name">
+                    <span>Name: </span>
+                  </Label>
+                </div>
+                <TextInput
+                  name="name"
+                  onChange={handleKciBillTo}
+                  value={kciObjBill.name}
+                />
+              </div>
+              <div className="">
+                <div className="mb-2 block">
+                  <Label htmlFor="contact">
+                    <span>Contact: </span>
+                  </Label>
+                </div>
+                <TextInput
+                  name="contact"
+                  onChange={handleKciBillTo}
+                  value={kciObjBill.contact}
+                />
+              </div>
+              <div className="">
+                <div className="mb-2 block">
+                  <Label htmlFor="billToAddress.pincode">
+                    <span>Email: </span>
+                  </Label>
+                </div>
+                <TextInput
+                  name="email"
+                  type="email"
+                  value={kciObjBill.email}
+                  onChange={handleKciBillTo}
+                />
+              </div>
+            </div>
+            <div className="max-w-full overflow-x-auto">
+              <Table hoverable={true} className="w-full">
+                <Table.Head>
+                  <Table.HeadCell>Sr.No</Table.HeadCell>
+                  <Table.HeadCell>Name</Table.HeadCell>
+                  <Table.HeadCell>Contact</Table.HeadCell>
+                  <Table.HeadCell>Email</Table.HeadCell>
+                  <Table.HeadCell>Delete</Table.HeadCell>
+                </Table.Head>
+                <Table.Body className="divide-y">
+                  {quote.billToAddress.kci.length > 0 &&
+                    quote.billToAddress.kci.map((kci, idx) => (
+                      <Table.Row
+                        key={kci.id}
+                        className="bg-white dark:bg-gray-800"
+                      >
+                        <Table.Cell>{idx + 1}</Table.Cell>
+                        <Table.Cell>{kci.name}</Table.Cell>
+                        <Table.Cell>{kci.contact}</Table.Cell>
+                        <Table.Cell>{kci.email}</Table.Cell>
+                        <Table.Cell onClick={() => deleteKciBill(kci.id)}>
+                          <div className="bg-red-400 rounded-full hover:bg-red-600 text-black hover:cursor-pointer size-7">
+                            <GiCancel className=" size-7" />
+                          </div>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                </Table.Body>
+              </Table>
+            </div>
           </div>
           <div className="p-4 col-span-4">
             <h3>Ship To Address</h3>
@@ -756,6 +964,88 @@ function NewQuote({ onClose }) {
                 onChange={handleAddress}
               />
             </div>
+
+            <div className="max-w-full flex justify-between items-center border-t border-l border-r">
+              <div></div>
+              <h2>KCI</h2>
+              <Button
+                onClick={moreKciShipTo}
+                gradientDuoTone={validKciShip ? "tealToLime" : "pinkToOrange"}
+                size="xs"
+                className="border"
+              >
+                +
+              </Button>
+            </div>
+            <div className="max-w-full flex gap-1 border-b border-l border-r">
+              <div className="">
+                <div className="mb-2 block">
+                  <Label htmlFor="name">
+                    <span>Name: </span>
+                  </Label>
+                </div>
+                <TextInput
+                  name="name"
+                  onChange={handleKciShipTo}
+                  value={kciObjShip.name}
+                />
+              </div>
+              <div className="">
+                <div className="mb-2 block">
+                  <Label htmlFor="contact">
+                    <span>Contact: </span>
+                  </Label>
+                </div>
+                <TextInput
+                  name="contact"
+                  onChange={handleKciShipTo}
+                  value={kciObjShip.contact}
+                />
+              </div>
+              <div className="">
+                <div className="mb-2 block">
+                  <Label htmlFor="billToAddress.pincode">
+                    <span>Email: </span>
+                  </Label>
+                </div>
+                <TextInput
+                  name="email"
+                  type="email"
+                  onChange={handleKciShipTo}
+                  value={kciObjShip.email}
+                />
+              </div>
+            </div>
+            <div className="max-w-full">
+              <Table hoverable={true} className="w-full">
+                <Table.Head>
+                  <Table.HeadCell>Sr.No</Table.HeadCell>
+                  <Table.HeadCell>Name</Table.HeadCell>
+                  <Table.HeadCell>Contact</Table.HeadCell>
+                  <Table.HeadCell>Email</Table.HeadCell>
+                  <Table.HeadCell>Delete</Table.HeadCell>
+                </Table.Head>
+                <Table.Body className="divide-y">
+                  {quote.shipToAddress.kci.length > 0 &&
+                    quote.shipToAddress.kci.map((kci, idx) => (
+                      <Table.Row
+                        key={idx}
+                        className="bg-white dark:bg-gray-800"
+                      >
+                        <Table.Cell>{idx + 1}</Table.Cell>
+                        <Table.Cell>{kci.name}</Table.Cell>
+                        <Table.Cell>{kci.contact}</Table.Cell>
+                        <Table.Cell>{kci.email}</Table.Cell>
+                        <Table.Cell onClick={() => deleteKciShip(kci.id)}>
+                          <div className="bg-red-400 rounded-full hover:bg-red-600 text-black hover:cursor-pointer size-7">
+                            <GiCancel className=" size-7" />
+                          </div>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                </Table.Body>
+              </Table>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -772,8 +1062,10 @@ function NewQuote({ onClose }) {
                   value={subRef}
                 >
                   <option></option>
-                  <option>Ref1</option>
-                  <option>Ref2</option>
+                  <option>Your enquiry & our discussion had with ____</option>
+                  <option>Your email enquiry Dated **/**/**</option>
+                  <option>Your email enquiry from _____ Dated **/**/**</option>
+                  <option>Your enquiry & our discussion had with </option>
                 </Select>
                 <div className="col-span-1 flex items-center justify-end">
                   <Button
@@ -862,6 +1154,15 @@ function NewQuote({ onClose }) {
                     onChange={() => setRadio(true)}
                   />
                   <Label htmlFor="supply/apply">Supply/Apply</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Radio
+                    id="supply"
+                    name="countries"
+                    value="supply"
+                    onChange={() => setRadio(true)}
+                  />
+                  <Label htmlFor="supply">Supply</Label>
                 </div>
               </fieldset>
             </div>

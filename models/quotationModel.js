@@ -155,11 +155,29 @@ const quotationSchema = mongoose.Schema(
       a6: String,
       city: String,
       pincode: String,
+      kci: {
+        type: [
+          {
+            id: {
+              type: String,
+            },
+            name: {
+              type: String,
+            },
+            designation: {
+              type: String,
+            },
+            contact: {
+              type: String,
+            },
+            email: {
+              type: String,
+            },
+          },
+        ],
+      },
     },
-    reference: {
-      type: String,
-      required: true,
-    },
+    reference: [{ type: String }],
     shipToAddress: {
       projectName: String,
       a1: String,
@@ -170,6 +188,27 @@ const quotationSchema = mongoose.Schema(
       a6: String,
       city: String,
       pincode: String,
+      kci: {
+        type: [
+          {
+            id: {
+              type: String,
+            },
+            name: {
+              type: String,
+            },
+            designation: {
+              type: String,
+            },
+            contact: {
+              type: String,
+            },
+            email: {
+              type: String,
+            },
+          },
+        ],
+      },
     },
     emailTo: {
       type: String,
@@ -339,7 +378,10 @@ quotationSchema.pre("findOneAndUpdate", async function (next) {
     }
 
     // Modify the update operation to include the new quotation number
-    this.setUpdate({ quotationNo: newQuotationNo });
+    this.setUpdate({
+      quotationNo: newQuotationNo,
+      quotationDate: new Date(),
+    });
 
     next();
   } catch (error) {

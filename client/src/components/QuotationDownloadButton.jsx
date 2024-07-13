@@ -10,9 +10,7 @@ import {
   WidthType,
   AlignmentType,
   BorderStyle,
-  Footer,
   ImageRun,
-  Header,
 } from "docx";
 import { saveAs } from "file-saver";
 import { useDispatch } from "react-redux";
@@ -41,6 +39,19 @@ const QuotationGenerator = ({ id }) => {
       const data = result.result;
       const [standard, applySupply] = saprateQuoteInfo(data.quoteInfo);
       const children = [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new ImageRun({
+              data: await fetchImage(headerImage),
+              transformation: {
+                width: 600,
+                height: 75,
+              },
+            }),
+          ],
+        }),
+        new Paragraph({ text: "" }),
         new Paragraph({
           children: [new TextRun({ text: "Quotation", bold: true, size: 24 })],
           alignment: AlignmentType.CENTER,
@@ -178,46 +189,36 @@ const QuotationGenerator = ({ id }) => {
         })
       );
 
+      //the footer image at the end
+      children.push(
+        new Paragraph({ text: "" }), // Add some space before the footer image
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new ImageRun({
+              data: await fetchImage(footerImage),
+              transformation: {
+                width: 600,
+                height: 65,
+              },
+            }),
+          ],
+        })
+      );
+
       // Generate DOCX
       const doc = new Document({
         sections: [
           {
-            properties: {},
-            headers: {
-              default: new Header({
-                children: [
-                  new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                      new ImageRun({
-                        data: await fetchImage(headerImage),
-                        transformation: {
-                          width: 600,
-                          height: 50,
-                        },
-                      }),
-                    ],
-                  }),
-                ],
-              }),
-            },
-            footers: {
-              default: new Footer({
-                children: [
-                  new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                      new ImageRun({
-                        data: await fetchImage(footerImage),
-                        transformation: {
-                          width: 600,
-                          height: 50,
-                        },
-                      }),
-                    ],
-                  }),
-                ],
-              }),
+            properties: {
+              page: {
+                margin: {
+                  top: 500, // 0.5 cm in twips (1 cm = 1000 twips)
+                  bottom: 500, // 0.5 cm in twips
+                  left: 800, // 1.27 cm in twips
+                  right: 800, // 1.27 cm in twips
+                },
+              },
             },
             children: children,
           },
@@ -313,10 +314,45 @@ const QuotationGenerator = ({ id }) => {
       bold: true,
     });
 
-    // Create a TextRun for the value
-    const valueText = new TextRun({
-      text: value,
-    });
+    let valueContent;
+
+    if (Array.isArray(value)) {
+      if (value.length === 1) {
+        // If there's only one element, treat it as a normal string
+        valueContent = [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: value[0],
+              }),
+            ],
+          }),
+        ];
+      } else {
+        // If there's more than one element, create numbered paragraphs
+        valueContent = value.map(
+          (item, index) =>
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${index + 1}. ${item}`,
+                }),
+              ],
+            })
+        );
+      }
+    } else {
+      // If value is not an array, create a single paragraph
+      valueContent = [
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: value,
+            }),
+          ],
+        }),
+      ];
+    }
 
     return new TableRow({
       children: [
@@ -325,7 +361,7 @@ const QuotationGenerator = ({ id }) => {
           width: { size: 25, type: WidthType.PERCENTAGE },
         }),
         new TableCell({
-          children: [new Paragraph({ children: [valueText] })],
+          children: valueContent,
           width: { size: 90, type: WidthType.PERCENTAGE },
         }),
       ],

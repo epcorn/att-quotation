@@ -59,6 +59,8 @@ const create = async (req, res, next) => {
         .status(400)
         .json({ message: "Project name and specification are required." });
     }
+    billToAddress.kci = removeIdFromDocuments(billToAddress.kci);
+    shipToAddress.kci = removeIdFromDocuments(shipToAddress.kci);
     let quoteInfoIds = [];
     for (let i = 0; i < infoArray.length; i++) {
       const quoteData = infoArray[i];
@@ -200,6 +202,11 @@ const update = async (req, res, next) => {
     const quotationId = req.params.id;
     const updatedData = req.body;
     const { quoteInfo, ...otherFields } = updatedData;
+
+    const { reference } = otherFields;
+    const referenceArray = String(reference).split(">.");
+    otherFields.reference = referenceArray;
+
     const isapproved = await Quotation.isApproved(quotationId);
     if (isapproved) {
       const { _id, ...state } = await Quotation.findById(quotationId)
@@ -410,7 +417,9 @@ const getArchive = async (req, res, next) => {
     next(error);
   }
 };
-
+const removeIdFromDocuments = (documents) => {
+  return documents.map(({ id, ...rest }) => rest);
+};
 function generateQuotation(data) {
   const doc = new Document({
     sections: [

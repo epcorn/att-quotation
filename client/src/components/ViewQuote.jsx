@@ -153,7 +153,14 @@ const ViewQuote = forwardRef((props) => {
             >
               Reference:
             </div>
-            <div className="w-2/3 text-gray-600">{quote.reference}</div>
+            <div className="w-2/3 text-gray-600">
+              {quote?.reference?.map((ref, idx) => (
+                <div key={idx}>
+                  <span className=" font-bold ">{idx + 1}</span>
+                  {ref}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mb-6 flex">

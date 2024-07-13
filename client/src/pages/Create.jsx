@@ -176,7 +176,7 @@ export default function Create() {
                                 ]}
                                 gradientDuoTone="tealToLime"
                               >
-                                Archive
+                                History
                               </Button>
                             </>
                           ) : null}
@@ -206,7 +206,7 @@ export default function Create() {
       <CustomModal
         isOpen={createModel}
         onClose={() => setCreateModel(!createModel)}
-        size="6xl"
+        size="7xl"
         heading="New Quotation"
       >
         <NewQuote onClose={() => setCreateModel(!createModel)} />

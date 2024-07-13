@@ -10,13 +10,16 @@ import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 function Update({ quoteId, onClose }) {
   const dispatch = useDispatch();
   const [quote, setQuote] = useState(null);
+  const [subRef, setSubRef] = useState();
   const { loading } = useSelector((state) => state.quote);
 
   useEffect(() => {
     async function fetchQuote() {
       const actionResult = await dispatch(getSingleQuote(quoteId));
       const result = unwrapResult(actionResult);
-      setQuote(result.result);
+      const output = result.result;
+      output.reference = output.reference.join(">.");
+      setQuote(output);
     }
     fetchQuote();
   }, [dispatch, quoteId]);
@@ -74,20 +77,22 @@ function Update({ quoteId, onClose }) {
     onClose();
   }
 
+  function handleSubRef(e) {
+    const { value } = e.target;
+    setSubRef(value);
+    if (quote === "") {
+      setQuote((prev) => ({ ...prev, reference: value }));
+    } else if (quote !== "") {
+      setQuote((prev) => ({
+        ...prev,
+        reference: ` ${prev.reference}>. ${value}`,
+      }));
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-evenly gap-4 mb-4 flex-wrap">
-        <div className="max-w-full">
-          <div className="mb-2 block">
-            <Label htmlFor="quotationDate" value="Quotation Date" />
-          </div>
-          <input
-            name="quotationDate"
-            type="date"
-            value={quote.quotationDate}
-            onChange={handleChange}
-          />
-        </div>
         <div className="max-w-full grid grid-cols-6">
           <div className="col-span-1">
             <div className="mb-2 ">
@@ -274,6 +279,37 @@ function Update({ quoteId, onClose }) {
               onChange={handleChange}
             />
           </div>
+          <div className="max-w-full flex gap-1 border-b border-l border-r">
+            {quote.billToAddress?.kci.length > 0 &&
+              quote.billToAddress.kci.map((kci) => (
+                <div key={kci._id} className="flex gap-1">
+                  <div className="">
+                    <div className="mb-2 block">
+                      <Label htmlFor="name">
+                        <span>Name: </span>
+                      </Label>
+                    </div>
+                    <TextInput name="name" value={kci.name} />
+                  </div>
+                  <div className="">
+                    <div className="mb-2 block">
+                      <Label htmlFor="contact">
+                        <span>Contact: </span>
+                      </Label>
+                    </div>
+                    <TextInput name="contact" value={kci.contact} />
+                  </div>
+                  <div className="">
+                    <div className="mb-2 block">
+                      <Label htmlFor="billToAddress.pincode">
+                        <span>Email: </span>
+                      </Label>
+                    </div>
+                    <TextInput name="email" type="email" value={kci.email} />
+                  </div>
+                </div>
+              ))}
+          </div>
         </div>
         <div className="p-4 col-span-4">
           <h3>Ship To Address</h3>
@@ -386,19 +422,62 @@ function Update({ quoteId, onClose }) {
               onChange={handleChange}
             />
           </div>
+          <div className="max-w-full flex gap-1 border-b border-l border-r">
+            {quote.shipToAddress?.kci.length > 0 &&
+              quote.shipToAddress.kci.map((kci) => (
+                <div key={kci._id} className="flex gap-1">
+                  <div className="">
+                    <div className="mb-2 block">
+                      <Label htmlFor="name">
+                        <span>Name: </span>
+                      </Label>
+                    </div>
+                    <TextInput name="name" value={kci.name} />
+                  </div>
+                  <div className="">
+                    <div className="mb-2 block">
+                      <Label htmlFor="contact">
+                        <span>Contact: </span>
+                      </Label>
+                    </div>
+                    <TextInput name="contact" value={kci.contact} />
+                  </div>
+                  <div className="">
+                    <div className="mb-2 block">
+                      <Label htmlFor="billToAddress.pincode">
+                        <span>Email: </span>
+                      </Label>
+                    </div>
+                    <TextInput name="email" type="email" value={kci.email} />
+                  </div>
+                </div>
+              ))}
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="max-w-full border p-1">
           <div className="mb-2 block">
-            <Label htmlFor="reference" className="grid grid-cols-12">
+            <Label htmlFor="subReference" className="grid grid-cols-12">
               <span className=" col-span-2">
                 Ref: <span className="text-red-500">*</span>
               </span>
-              <Select name="reference" className="col-span-9">
+              <Select
+                name="subReference"
+                className="col-span-9"
+                onChange={handleSubRef}
+              >
                 <option></option>
-                <option>Ref1</option>
+                {quote.approved ? (
+                  <option>{`Our earlier quotation No: ${
+                    quote.quotationNo
+                  } dated ${new Date(quote.quotationDate).toLocaleDateString(
+                    "en-GB"
+                  )} being revised.`}</option>
+                ) : (
+                  <option> Ref1</option>
+                )}
                 <option>Ref2</option>
               </Select>
             </Label>
@@ -474,8 +553,8 @@ function Update({ quoteId, onClose }) {
                     <option></option>
                     <option value="Sq.fts">Sq.fts</option>
                     <option value="Sq.mts">Sq.mts</option>
-                    <option value="Rn.fts">Rn.fts</option>
-                    <option value=""></option>
+                    <option value="R.fts">R.fts</option>
+                    <option value="R.mts">R.mts</option>
                   </Select>
                 </div>
               </div>
