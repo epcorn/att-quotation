@@ -8,7 +8,6 @@ import errorMiddleware from "./middleware/errorMiddleware.js";
 import rootRouter from "./routes/index.js";
 
 connectDB();
-
 const app = express();
 
 //Root Middleware
